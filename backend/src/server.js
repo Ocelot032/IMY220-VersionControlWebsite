@@ -16,6 +16,8 @@ app.get('/api', (req, res) => {
     res.json({ message: "Hey there form the backend :)" });
 });
 
+// Tester comment weewooweewoo
+
 app.get('/{*any}', (req, res) => res.sendFile(path.resolve('public', 'index.html')));
 
 app.listen(port, () => {
