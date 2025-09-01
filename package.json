@@ -1,0 +1,39 @@
+{
+  "name": "imy220-versioncontrolwebsite",
+  "version": "1.0.0",
+  "description": "My name is Louise Bruwer <br/>\r This is my Version Control Website for IMY220. Its purpose is to allow users to share and update files in shared projects, view other projects, add friends, collaborate and more.",
+  "main": "backend/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "start": "node backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Ocelot032@github.com/Ocelot032/IMY220-VersionControlWebsite.git"
+  },
+  "keywords": [],
+  "author": "u23673941 Louise Bruwer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ocelot032/IMY220-VersionControlWebsite/issues"
+  },
+  "homepage": "https://github.com/Ocelot032/IMY220-VersionControlWebsite#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "babel-loader": "^10.0.0",
+    "path": "^0.12.7",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  }
+}

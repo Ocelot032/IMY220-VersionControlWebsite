@@ -1,24 +1,26 @@
+//Main component for routing
+
 import React from "react";
-import { BrowserRouter, Route, Routes, createBrowserRouter } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RouterProvider } from "react-router/dom";
 import Home from "./pages/Home";
-import Posts from "./pages/Posts";
 
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Home/>
-    }, {
-        path: "/posts",
-        element: <Posts/>,
-        children: [
-            {
-                path: "/edit",
-                element: <EditPost/>
-            }
-        ]
-    }
-])
+
+// const router = createBrowserRouter([
+//     {
+//         path: "/",
+//         element: <Home/>
+//     }, {
+//         path: "/posts",
+//         element: <Posts/>,
+//         children: [
+//             {
+//                 path: "/edit",
+//                 element: <EditPost/>
+//             }
+//         ]
+//     }
+// ])
 
 const App = () => {
     return (
