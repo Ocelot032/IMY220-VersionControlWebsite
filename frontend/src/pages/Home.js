@@ -1,26 +1,28 @@
-// import React from "react";
-// // import { Link } from "react-router";
-// import { Link } from "react-router-dom";
-
-// const Home = () => {
-//     return(
-//         <div>
-//             <h1>Hello Home Page!</h1>
-//             <Link to = "/" style = {{"padding" : "5px"}}>Home</Link>
-//             <Link to = "/posts">Posts</Link>
-//         </div>
-//     );
-// }
-
-// export default Home;
-
+import { Link } from "react-router-dom";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Login from "./Login";
+import Register from "./Register";
 import React from "react";
+import "../styling/page.css";
 
 const Home = () => {
     return (
         <div>
-            <h1>Welcome to my project!</h1>
-            <p>This is the Home page for testing.</p>
+            <Header/>
+            <p>This is the Home page for testing.</p><br/>
+            <span>
+                <Link to = "/login">
+                <button>Login</button>
+                </Link>
+            </span>
+            <br/>
+            <span>
+                <Link to = "/register">
+                <button>Register</button>
+                </Link>
+            </span>
+            <Footer/>
         </div>
     );
 }
