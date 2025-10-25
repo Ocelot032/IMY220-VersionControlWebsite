@@ -6,7 +6,7 @@ const multer = require('multer');
 const fs = require('fs');
 const  { MongoClient, ObjectId } = require('mongodb');
 
-connectionString = "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
+const connectionString = "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 const client = new MongoClient(connectionString);
 
 let db;
@@ -138,17 +138,17 @@ app.post('/api/users/register', upload.single('profileImg'), async (req, res) =>
         }
 
         const userDoc = {
-        username,
-        email,
-        password,
-        name: name || '',
-        surname: surname || '',
-        workplace: workplace || '',
-        birthday: birthday || '',
-        profileImg, 
-        friends: [],
-        isAdmin: isAdmin === 'true' || isAdmin === true, // convert to boolean if needed
-        createdAt: new Date(),
+          username,
+          email,
+          password,
+          name: name || '',
+          surname: surname || '',
+          workplace: workplace || '',
+          birthday: birthday || '',
+          profileImg, 
+          friends: [],
+          isAdmin: isAdmin === 'true' || isAdmin === true, // convert to boolean if needed
+          createdAt: new Date(),
         };
 
         const result = await queryDB('users', 'insertOne', { doc: userDoc });

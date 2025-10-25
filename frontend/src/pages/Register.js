@@ -2,7 +2,6 @@ import React  from "react";
 import Header from "../components/Header";
 import RegisterForm from "../components/Register";
 import Footer from "../components/Footer";
-// import "../styling/page.css";
 
 const Register = () => {
     return (

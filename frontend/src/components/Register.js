@@ -1,113 +1,187 @@
-import React from "react";
-import { useState } from "react";
-// import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
-    const [email, setEmail] = useState("");
-    const [workplace, setWorkplace] = useState("");
-    const [birthday, setBirthday] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmpassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+    const { register } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const [formData, setFormData] = useState({
+        name: "",
+        surname: "",
+        username: "",
+        email: "",
+        birthday: "",
+        workplace: "",
+        password: "",
+        confirmPassword: "",
+    });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    //validation + backend call
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!username || !password) {
+        const { name, surname, username, email, birthday, workplace, password, confirmPassword } = formData;
+
+        if (!name || !surname || !username || !email || !birthday || !workplace || !password || !confirmPassword) {
             setError("All fields are required.");
-            return;
+        return;
+        }
+
+        if (!email.includes("@")) {
+            setError("Please enter a valid email address.");
+        return;
         }
 
         if (password.length < 6) {
             setError("Password must be at least 6 characters long.");
-            return;
+        return;
         }
 
-        if (!email.includes("@")){
-            setError("Email not valid.");
-            return;
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+        return;
         }
 
-        if (password !== confirmpassword){
-            setError("Passwords must match.");
-            return;
-        }
-
+        try {
+        setLoading(true);
         setError("");
-        alert("Login successful. Welcome Back!"); 
+
+        // Connect to backend w/ AuthContext
+        await register(formData);
+            navigate("/home");
+        } catch (err) {
+            setError(err.message || "Registration failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <form>
-            <div>
-                <label>Username: </label>
-                <input
-                    type = "text"
-                    placeholder = "Username"
-                    value = {username}
-                    onChange = {(e) => setUsername(e.target.value)}
-                    required
-                />
-            </div>
-            <br/>
-            <div>
-                <label>Email</label>
-                <input
-                    type = "email"
-                    placeholder = "Email"
-                    value={email}
-                    onChange = {(e) => setEmail(e.target.value)}
-                    required
-                />
-            </div>
-            <br/>
-            <div>
-                <label>Birthday</label>
-                <input
-                    type = "date"
-                    placeholder = "Birthday"
-                    value={email}
-                    onChange = {(e) => setBirthday(e.target.value)}
-                    required
-                />
-            </div>
-            <br/>
-            <div>
-                <label>Workplace</label>
-                <input
-                    type = "text"
-                    placeholder = "Workplace"
-                    value={workplace}
-                    onChange = {(e) => setWorkplace(e.target.value)}
-                    required
-                />
-            </div>
-            <br/>
-            <div>
-                <label>Password</label>
-                <input
-                    type = "password"
-                    placeholder = "Password"
-                    value={password}
-                    onChange = {(e) => setPassword(e.target.value)}
-                    required
-                    minLength = {6}
-                />
-            </div>
-            <br/>
-            <div>
-                <label>Confirm Password</label>
-                <input
-                    type = "password"
-                    placeholder = "Confirm Password"
-                    value={confirmpassword}
-                    onChange = {(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength = {6}
-                />
-            </div>
-            <button type="submit">Register</button>
+        <form onSubmit={handleSubmit} noValidate>
+        <div>
+            <label htmlFor="name">Name:</label>
+            <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="surname">Surname:</label>
+            <input
+            id="surname"
+            name="surname"
+            type="text"
+            placeholder="Surmame"
+            value={formData.surname}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="username">Username:</label>
+            <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="email">Email:</label>
+            <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="birthday">Birthday:</label>
+            <input
+            id="birthday"
+            name="birthday"
+            type="date"
+            value={formData.birthday}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="workplace">Workplace:</label>
+            <input
+            id="workplace"
+            name="workplace"
+            type="text"
+            placeholder="Workplace"
+            value={formData.workplace}
+            onChange={handleChange}
+            required
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="password">Password:</label>
+            <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            minLength={6}
+            />
+        </div>
+        <br />
+
+        <div>
+            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            minLength={6}
+            />
+        </div>
+        <br />
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="submit" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
+        </button>
         </form>
     );
 };
