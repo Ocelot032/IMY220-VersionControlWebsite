@@ -1,5 +1,4 @@
 import React, {Link} from "react";
-import { projects } from "../data/projects";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";

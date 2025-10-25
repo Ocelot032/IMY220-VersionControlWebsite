@@ -851,6 +851,24 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something went wrong on the server.' });
 });
 
+
+
+app.get('/', (req, res) => {
+  res.send('✅ Root route works');
+});
+
+console.log(">>> RUNTIME __dirname:", __dirname);
+console.log(">>> STATIC DIR:", path.join(__dirname, "..", "frontend", "public"));
+
+app.use(express.static(path.join(__dirname, "..", "frontend", "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "frontend", "public", "index.html"));
+});
+
+
+
+
 // ======== Connect to db, start server
 connectDB()
     .then(() => {
