@@ -156,7 +156,7 @@ app.use(session({
 }));
 
 // ==================== File uploads ====================
-var uploadRoot = path.join(__dirname, "uploads");
+var uploadRoot = path.join(projectRoot, "uploads");
 if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, {
   recursive: true
 });

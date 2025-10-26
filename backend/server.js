@@ -73,21 +73,21 @@ app.use(
 );
 
 app.use(
-  session({
-    secret: "IMY220ProjectFinal",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false },
-  })
+    session({
+      secret: "IMY220ProjectFinal",
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: false },
+    })
 );
 
 // ==================== File uploads ====================
-const uploadRoot = path.join(__dirname, "uploads");
+const uploadRoot = path.join(projectRoot, "uploads");
 if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, { recursive: true });
 if (!fs.existsSync(path.join(uploadRoot, "projects")))
-  fs.mkdirSync(path.join(uploadRoot, "projects"), { recursive: true });
+    fs.mkdirSync(path.join(uploadRoot, "projects"), { recursive: true });
 if (!fs.existsSync(path.join(uploadRoot, "profiles")))
-  fs.mkdirSync(path.join(uploadRoot, "profiles"), { recursive: true });
+    fs.mkdirSync(path.join(uploadRoot, "profiles"), { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
