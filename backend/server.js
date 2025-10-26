@@ -152,6 +152,14 @@ app.post("/api/users/logout", (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
 //======== GET all users
 app.get('/api/users/', async (req, res) => {
   try {
@@ -272,6 +280,47 @@ app.get('/api/project/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch project.' });
   }
 });
+
+
+
+
+
+
+
+// ======== GET local projects for a user (friends' projects)
+app.get('/api/project/local/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    // find the user to get their friends
+    const userArr = await queryDB('users', 'find', { query: { username } });
+    if (!userArr.length) return res.status(404).json({ error: 'User not found.' });
+
+    const user = userArr[0];
+    const friendUsernames = user.friends || [];
+
+    // find all projects owned by or involving any of the friends
+    const projects = await queryDB('projects', 'find', {
+      query: {
+        $or: [
+          { owner: { $in: friendUsernames } },
+          { members: { $elemMatch: { $in: friendUsernames } } },
+        ],
+      },
+      sort: { createdAt: -1 },
+    });
+
+    res.json(projects);
+  } catch (err) {
+    console.error('Fetch local projects error:', err);
+    res.status(500).json({ error: 'Failed to fetch local projects.' });
+  }
+});
+
+
+
+
+
 
 // ======== CREATE Project
 app.post('/api/project/', async (req, res) => {

@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const { login } = useContext(AuthContext); // ✅ new
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,10 +32,13 @@ const LoginForm = () => {
       console.log("Login response:", data);
 
       if (response.ok) {
-        // Backend returns { message, user }
         alert(data.message);
+
+        // ✅ update both localStorage and AuthContext
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/home");
+        if (login) login(data.user); // safely update context
+
+        navigate("/home"); // ✅ redirect after login
       } else {
         setError(data.error || "Login failed.");
       }

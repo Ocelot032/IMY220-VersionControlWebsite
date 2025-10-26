@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // ✅ reuse login to set user in context
+
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -84,7 +87,9 @@ const RegisterForm = () => {
       if (response.ok) {
         alert("Registration successful!");
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/home");
+
+        if (login) login(data.user); // ✅ update AuthContext immediately
+        navigate("/home"); // ✅ redirect to home
       } else {
         setError(data.error || "Registration failed. Please try again.");
       }
@@ -95,6 +100,7 @@ const RegisterForm = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit} noValidate encType="multipart/form-data">
