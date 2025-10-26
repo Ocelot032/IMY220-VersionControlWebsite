@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // ✅ reuse login to set user in context
+  const { login } = useContext(AuthContext); 
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,7 +64,6 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      // build multipart form data
       const formDataToSend = new FormData();
       formDataToSend.append("name", name);
       formDataToSend.append("surname", surname);
@@ -78,7 +77,7 @@ const RegisterForm = () => {
       const response = await fetch("http://localhost:8080/api/users/register", {
         method: "POST",
         body: formDataToSend,
-        credentials: "include", // keep session
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -88,8 +87,8 @@ const RegisterForm = () => {
         alert("Registration successful!");
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        if (login) login(data.user); // ✅ update AuthContext immediately
-        navigate("/home"); // ✅ redirect to home
+        if (login) login(data.user);
+        navigate("/home"); 
       } else {
         setError(data.error || "Registration failed. Please try again.");
       }
