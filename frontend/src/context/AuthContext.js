@@ -50,6 +50,61 @@ export const AuthProvider = ({ children }) => {
 };
 
 
+
+
+
+
+// import React, { createContext, useState, useEffect } from "react";
+// export const AuthContext = createContext();
+
+// export const AuthProvider = ({ children }) => {
+//   // ✅ Safe JSON parse
+//   const getStoredUser = () => {
+//     try {
+//       const item = localStorage.getItem("user");
+//       return item ? JSON.parse(item) : null;
+//     } catch (err) {
+//       console.warn("Invalid user data in localStorage. Clearing it.", err);
+//       localStorage.removeItem("user");
+//       return null;
+//     }
+//   };
+
+//   const [user, setUser] = useState(getStoredUser());
+//   const [token, setToken] = useState(localStorage.getItem("token") || null);
+
+//   useEffect(() => {
+//     if (user) {
+//       localStorage.setItem("user", JSON.stringify(user)); // ensure consistency
+//     }
+//   }, [user]);
+
+//   const login = (userData) => {
+//     setUser(userData);
+//     localStorage.setItem("user", JSON.stringify(userData));
+//   };
+
+//   const logout = () => {
+//     setUser(null);
+//     setToken(null);
+//     localStorage.removeItem("user");
+//     localStorage.removeItem("token");
+//   };
+
+//   return (
+//     <AuthContext.Provider value={{ user, login, logout }}>
+//       {children}
+//     </AuthContext.Provider>
+//   );
+// };
+
+
+
+
+
+
+
+
 // import React, { createContext, useState, useEffect } from "react";
 
 // export const AuthContext = createContext();
