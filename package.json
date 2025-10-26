@@ -5,8 +5,10 @@
   "main": "./frontend/src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack && babel server.js -d dist",
-    "start": "npm run build && node dist/server.js"
+    "build": "webpack && babel backend/server.js -d backend/dist",
+    "start": "npm run build && node backend/dist/server.js",
+    "dev:server": "nodemon backend/server.js",
+    "dev:frontend": "webpack serve --config webpack.config.js --open"
   },
   "keywords": [],
   "author": "",

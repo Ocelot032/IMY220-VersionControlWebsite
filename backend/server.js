@@ -1,212 +1,156 @@
-const express = require('express');
-const path = require('path');
-const session = require('express-session');
-const cors = require('cors');
-const multer = require('multer');
-const fs = require('fs');
-const  { MongoClient, ObjectId } = require('mongodb');
+// ==================== Core imports ====================
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const cors = require("cors");
+const multer = require("multer");
+const fs = require("fs");
+const { MongoClient, ObjectId } = require("mongodb");
 
-const connectionString = "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
+// ==================== MongoDB setup ====================
+const connectionString =
+  "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 const client = new MongoClient(connectionString);
-
 let db;
 
-async function connectDB(){
-    if (db) return db;
+async function connectDB() {
+  if (db) return db;
+  try {
+    await client.connect();
+    db = client.db("Zynthex");
+    console.log("MongoDB Connected");
 
-    try {
-        await client.connect(); //opening a connection to mongodb server
-        db = client.db("Zynthex");
-        console.log("MongoDB Connected");
+    await db.collection("users").createIndex({ username: 1 }, { unique: true });
+    await db.collection("users").createIndex({ email: 1 }, { unique: true });
+    await db.collection("projects").createIndex({ owner: 1 });
 
-        //create the indexes
-        await db.collection("users").createIndex({ username: 1 }, { unique: true });
-        await db.collection("users").createIndex({ email: 1 }, { unique: true });
-        await db.collection("projects").createIndex({ owner: 1 });
-
-        return db;
-        
-    } catch (err) {
-        console.error("MongoDB Connection error", err)
-        throw err;
-    }
+    return db;
+  } catch (err) {
+    console.error("MongoDB Connection error", err);
+    throw err;
+  }
 }
 
-//general query function
-async function queryDB(collectionName, operation, data = {}){
-    const db = await connectDB();
-    const collection = db.collection(collectionName);
-    try {
-        switch (operation) {
-            case 'find':
-                return await collection.find(data.query || {}, data.options || {}).toArray();
-            case 'insertOne':
-                return await collection.insertOne(data.doc);
-            case 'updateOne':
-                return await collection.updateOne(data.filter, data.update, data.options || {});
-            case 'deleteOne':
-                return await collection.deleteOne(data.filter);
-            case 'aggregate':
-                return await collection.aggregate(data.pipeline || []).toArray();
-            default:
-                throw new Error('Invalid operation');
-        }
-    } catch (err) {
-        console.error(`Error in ${operation} on ${collectionName}: `, err);
-        throw err;
-    }
+// ==================== Query helper ====================
+async function queryDB(collectionName, operation, data = {}) {
+  const db = await connectDB();
+  const collection = db.collection(collectionName);
+  switch (operation) {
+    case "find":
+      return await collection.find(data.query || {}, data.options || {}).toArray();
+    case "insertOne":
+      return await collection.insertOne(data.doc);
+    case "updateOne":
+      return await collection.updateOne(data.filter, data.update, data.options || {});
+    case "deleteOne":
+      return await collection.deleteOne(data.filter);
+    case "aggregate":
+      return await collection.aggregate(data.pipeline || []).toArray();
+    default:
+      throw new Error("Invalid operation");
+  }
 }
 
-//======== Initial Setup
+// ==================== Express app setup ====================
 const app = express();
 const PORT = 8080;
 
-//======== Middleware
+// Universal project root (works in backend/ and backend/dist/)
+const projectRoot = path.resolve(__dirname, "..", "..");
+// const projectRoot = __dirname.includes("backend")
+//   ? path.resolve(__dirname, "..") // running from /backend
+//   : path.resolve(__dirname);      // running from /dist
 
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-    origin: 'http://localhost:3000', 
-    credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
-// Setup static files - frontend + uploads
-app.use(express.static(path.join(__dirname, '../frontend/public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-//======== Session Setup
-app.use(session({
-    secret: 'IMY220ProjectFinal', //change to Zynthex?
+app.use(
+  session({
+    secret: "IMY220ProjectFinal",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } 
-}));
+    cookie: { secure: false },
+  })
+);
 
-//======== Create upload folders if they dont exist
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads', { recursive: true });
-}
+// ==================== File uploads ====================
+const uploadRoot = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, { recursive: true });
+if (!fs.existsSync(path.join(uploadRoot, "projects")))
+  fs.mkdirSync(path.join(uploadRoot, "projects"), { recursive: true });
+if (!fs.existsSync(path.join(uploadRoot, "profiles")))
+  fs.mkdirSync(path.join(uploadRoot, "profiles"), { recursive: true });
 
-if (!fs.existsSync('uploads/projects')) {
-    fs.mkdirSync('uploads/projects', { recursive: true });
-}
-
-if (!fs.existsSync('uploads/profiles')) {
-    fs.mkdirSync('uploads/profiles', { recursive: true });
-}
-
-//======== Multer stuff
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        if (file.fieldname === 'profileImg') cb(null, 'uploads/profiles');
-        else cb(null, 'uploads/projects');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
+  destination: (req, file, cb) => {
+    if (file.fieldname === "profileImg") cb(null, path.join(uploadRoot, "profiles"));
+    else cb(null, path.join(uploadRoot, "projects"));
+  },
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5mb limit
-});
-
-// Export upload middleware for use in routes
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 app.locals.upload = upload;
 
-// ======== ROUTES
-// ====== USERS
-app.post('/api/users/register', upload.single('profileImg'), async (req, res) => {
-    try {
-        const { username, email, password, name, surname, workplace, birthday, isAdmin } = req.body;
 
-        if (!username || !email || !password)
-        return res.status(400).json({ error: 'All required fields must be filled.' });
-
-        // unique username and not changable
-        const existingUser = await queryDB('users', 'find', {
-        query: { $or: [{ username }, { email }] },
-        });
-        if (existingUser.length > 0)
-        return res.status(400).json({ error: 'Username or email already exists.' });
-
-        // handle file upload
-        let profileImg = '';
-        if (req.file) {
-        profileImg = req.file.filename; 
-        }
-
-        const userDoc = {
-          username,
-          email,
-          password,
-          name: name || '',
-          surname: surname || '',
-          workplace: workplace || '',
-          birthday: birthday || '',
-          profileImg, 
-          friends: [],
-          isAdmin: isAdmin === 'true' || isAdmin === true, // convert to boolean if needed
-          createdAt: new Date(),
-        };
-
-        const result = await queryDB('users', 'insertOne', { doc: userDoc });
-        res.status(201).json({
-        message: 'User registered successfully',
-        user: {
-            username,
-            email,
-            name,
-            surname,
-            profileImg,
-        },
-        insertedId: result.insertedId,
-        });
-    } catch (err) {
-        console.error('Register error:', err);
-        res.status(500).json({ error: 'Internal server error during registration.' });
-    }
+// ==================== API ROUTES ====================
+// -- keep all your CRUD routes exactly as they are here --
+// Example stubs shown for reference:
+app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
+  try {
+    const user = req.body;
+    user.profileImg = req.file ? req.file.filename : null;
+    const result = await queryDB("users", "insertOne", { doc: user });
+    res.json(result);
+  } catch (err) {
+    console.error("Register error:", err);
+    res.status(500).json({ error: "Registration failed" });
+  }
 });
 
-
-//======== Login
-app.post('/api/users/login', async (req, res) => {
+app.post("/api/users/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password)
-      return res.status(400).json({ error: 'Username and password required.' });
+      return res.status(400).json({ error: "Username and password required." });
 
-    const user = await queryDB('users', 'find', { query: { username, password } });
+    const user = await queryDB("users", "find", { query: { username, password } });
     if (user.length === 0)
-      return res.status(401).json({ error: 'Invalid credentials.' });
+      return res.status(401).json({ error: "Invalid credentials." });
 
-    // create session
     req.session.user = {
       username: user[0].username,
       email: user[0].email,
       isAdmin: user[0].isAdmin,
     };
 
-    res.json({ message: 'Login successful', user: req.session.user });
+    res.json({ message: "Login successful", user: req.session.user });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Internal server error during login.' });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Internal server error during login." });
   }
 });
 
-//======== Logout
-app.post('/api/users/logout', (req, res) => {
+app.post("/api/users/logout", (req, res) => {
   if (req.session.user) {
     req.session.destroy((err) => {
-      if (err) return res.status(500).json({ error: 'Logout failed.' });
-      res.clearCookie('connect.sid');
-      res.json({ message: 'Logged out successfully.' });
+      if (err) return res.status(500).json({ error: "Logout failed." });
+      res.clearCookie("connect.sid");
+      res.json({ message: "Logged out successfully." });
     });
   } else {
-    res.status(400).json({ error: 'No active session.' });
+    res.status(400).json({ error: "No active session." });
   }
 });
+
+
 
 //======== GET all users
 app.get('/api/users/', async (req, res) => {
@@ -840,36 +784,27 @@ app.delete('/api/checkins/:id', async (req, res) => {
   }
 });
 
-// ======== Root test route
-app.get('/api', (req, res) => {
-    res.json({ message: 'API working successfully' });
+
+
+// Quick sanity route
+app.get("/api", (req, res) => res.json({ message: "API working successfully" }));
+
+// ==================== Frontend serving ====================
+// Serve the built or public React files regardless of build mode
+app.use(express.static(path.join(projectRoot, "frontend", "public")));
+
+// Let React Router handle non-API routes
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });
 
-// ======== Error handling
+// ==================== Error handling ====================
 app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).json({ error: 'Something went wrong on the server.' });
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Something went wrong on the server." });
 });
 
-
-
-app.get('/', (req, res) => {
-  res.send('✅ Root route works');
-});
-
-console.log(">>> RUNTIME __dirname:", __dirname);
-console.log(">>> STATIC DIR:", path.join(__dirname, "..", "frontend", "public"));
-
-app.use(express.static(path.join(__dirname, "..", "frontend", "public")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "frontend", "public", "index.html"));
-});
-
-
-
-
-// ======== Connect to db, start server
+// ==================== Start server ====================
 connectDB()
     .then(() => {
         app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

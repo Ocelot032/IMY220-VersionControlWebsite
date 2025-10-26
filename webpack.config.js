@@ -19,11 +19,18 @@ module.exports = {
     ]
     },
     devServer: {
-        static: {
-            directory: path.join(__dirname, 'public'),
-        },
-        compress: true,
-        hot: true,
-        port: 8080,
-    }
+  static: {
+    directory: path.join(__dirname, 'frontend/public'),
+  },
+  port: 3000,
+  historyApiFallback: true,
+  proxy: [
+    {
+      context: ['/api'],
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  ],
+},
+
 }

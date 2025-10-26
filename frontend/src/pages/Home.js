@@ -4,9 +4,6 @@ import { Link } from "react-router-dom"
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-import FeedLocal from "../components/FeedLocal";
-import FeedGlobal from "../components/FeedGlobal";
-
 const Home = () => {
     const [showLocal, setShowLocal] = useState(true);
 
@@ -30,7 +27,22 @@ const Home = () => {
             </div>
 
             <div className = "feed-container">
-                {showLocal ? <FeedLocal/> : <FeedGlobal/>}
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
+                <p>Project Name</p>
             </div>
 
             <span>
