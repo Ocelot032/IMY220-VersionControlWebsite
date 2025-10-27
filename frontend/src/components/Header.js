@@ -10,7 +10,8 @@ const Header = () => {
       <h1 id="headerTitle">ZYNTHEX</h1>
 
       <Link to="/home" className="navItem">Home</Link>
-      <Link to="/projects" className="navItem">Projects</Link>
+    
+
 
       {user && (
         <Link to={`/profile/${user.username}`} className="navItem">

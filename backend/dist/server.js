@@ -92,7 +92,7 @@ function _queryDB() {
           db = _context30.v;
           collection = db.collection(collectionName);
           _t30 = operation;
-          _context30.n = _t30 === "find" ? 2 : _t30 === "insertOne" ? 4 : _t30 === "updateOne" ? 6 : _t30 === "deleteOne" ? 8 : _t30 === "aggregate" ? 10 : 12;
+          _context30.n = _t30 === "find" ? 2 : _t30 === "insertOne" ? 4 : _t30 === "updateOne" ? 6 : _t30 === "deleteOne" ? 8 : _t30 === "delete" ? 10 : _t30 === "aggregate" ? 12 : 14;
           break;
         case 2:
           _context30.n = 3;
@@ -111,17 +111,22 @@ function _queryDB() {
           return _context30.a(2, _context30.v);
         case 8:
           _context30.n = 9;
-          return collection.deleteOne(data.filter);
+          return collection.deleteOne(data.filter || data.query || {});
         case 9:
           return _context30.a(2, _context30.v);
         case 10:
           _context30.n = 11;
-          return collection.aggregate(data.pipeline || []).toArray();
+          return collection.deleteMany(data.filter || data.query || {});
         case 11:
           return _context30.a(2, _context30.v);
         case 12:
-          throw new Error("Invalid operation");
+          _context30.n = 13;
+          return collection.aggregate(data.pipeline || []).toArray();
         case 13:
+          return _context30.a(2, _context30.v);
+        case 14:
+          throw new Error("Invalid operation");
+        case 15:
           return _context30.a(2);
       }
     }, _callee30);
@@ -543,9 +548,8 @@ app.post('/api/users/:username/upload', function (req, res, next) {
 });
 
 // ====== PROJECTS
-
 // ======== GET all projects
-app.get('/api/project/', /*#__PURE__*/function () {
+app.get("/api/project/", /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(req, res) {
     var projects, _t8;
     return _regenerator().w(function (_context8) {
@@ -553,7 +557,11 @@ app.get('/api/project/', /*#__PURE__*/function () {
         case 0:
           _context8.p = 0;
           _context8.n = 1;
-          return queryDB('projects', 'find');
+          return queryDB("projects", "find", {
+            sort: {
+              createdAt: -1
+            }
+          });
         case 1:
           projects = _context8.v;
           res.json(projects);
@@ -562,9 +570,9 @@ app.get('/api/project/', /*#__PURE__*/function () {
         case 2:
           _context8.p = 2;
           _t8 = _context8.v;
-          console.error('Fetch projects error:', _t8);
+          console.error("Fetch projects error:", _t8);
           res.status(500).json({
-            error: 'Failed to fetch projects.'
+            error: "Failed to fetch projects."
           });
         case 3:
           return _context8.a(2);
@@ -577,7 +585,7 @@ app.get('/api/project/', /*#__PURE__*/function () {
 }());
 
 // ======== GET single project by id
-app.get('/api/project/:id', /*#__PURE__*/function () {
+app.get("/api/project/:id", /*#__PURE__*/function () {
   var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(req, res) {
     var id, project, _t9;
     return _regenerator().w(function (_context9) {
@@ -586,7 +594,7 @@ app.get('/api/project/:id', /*#__PURE__*/function () {
           _context9.p = 0;
           id = new ObjectId(req.params.id);
           _context9.n = 1;
-          return queryDB('projects', 'find', {
+          return queryDB("projects", "find", {
             query: {
               _id: id
             }
@@ -598,7 +606,7 @@ app.get('/api/project/:id', /*#__PURE__*/function () {
             break;
           }
           return _context9.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
           res.json(project[0]);
@@ -607,9 +615,9 @@ app.get('/api/project/:id', /*#__PURE__*/function () {
         case 3:
           _context9.p = 3;
           _t9 = _context9.v;
-          console.error('Fetch project error:', _t9);
+          console.error("Fetch project error:", _t9);
           res.status(500).json({
-            error: 'Failed to fetch project.'
+            error: "Failed to fetch project."
           });
         case 4:
           return _context9.a(2);
@@ -622,7 +630,7 @@ app.get('/api/project/:id', /*#__PURE__*/function () {
 }());
 
 // ======== GET all projects of a specific user (by username)
-app.get('/api/projects/user/:username', /*#__PURE__*/function () {
+app.get("/api/projects/user/:username", /*#__PURE__*/function () {
   var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(req, res) {
     var username, projects, _t0;
     return _regenerator().w(function (_context0) {
@@ -631,7 +639,7 @@ app.get('/api/projects/user/:username', /*#__PURE__*/function () {
           _context0.p = 0;
           username = req.params.username;
           _context0.n = 1;
-          return queryDB('projects', 'find', {
+          return queryDB("projects", "find", {
             query: {
               owner: username
             }
@@ -643,7 +651,7 @@ app.get('/api/projects/user/:username', /*#__PURE__*/function () {
             break;
           }
           return _context0.a(2, res.status(404).json({
-            message: 'No projects found for this user.'
+            message: "No projects found for this user."
           }));
         case 2:
           res.json(projects);
@@ -652,9 +660,9 @@ app.get('/api/projects/user/:username', /*#__PURE__*/function () {
         case 3:
           _context0.p = 3;
           _t0 = _context0.v;
-          console.error('Error fetching user projects:', _t0);
+          console.error("Error fetching user projects:", _t0);
           res.status(500).json({
-            error: 'Internal server error.'
+            error: "Internal server error."
           });
         case 4:
           return _context0.a(2);
@@ -667,16 +675,16 @@ app.get('/api/projects/user/:username', /*#__PURE__*/function () {
 }());
 
 // ======== GET local projects for a user (friends' projects)
-app.get('/api/project/local/:username', /*#__PURE__*/function () {
+app.get("/api/project/local/:username", /*#__PURE__*/function () {
   var _ref1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(req, res) {
     var username, userArr, user, friendUsernames, projects, _t1;
     return _regenerator().w(function (_context1) {
       while (1) switch (_context1.p = _context1.n) {
         case 0:
           _context1.p = 0;
-          username = req.params.username; // find the user to get their friends
+          username = req.params.username;
           _context1.n = 1;
-          return queryDB('users', 'find', {
+          return queryDB("users", "find", {
             query: {
               username: username
             }
@@ -688,13 +696,13 @@ app.get('/api/project/local/:username', /*#__PURE__*/function () {
             break;
           }
           return _context1.a(2, res.status(404).json({
-            error: 'User not found.'
+            error: "User not found."
           }));
         case 2:
           user = userArr[0];
-          friendUsernames = user.friends || []; // find all projects owned by or involving any of the friends
+          friendUsernames = user.friends || [];
           _context1.n = 3;
-          return queryDB('projects', 'find', {
+          return queryDB("projects", "find", {
             query: {
               $or: [{
                 owner: {
@@ -720,9 +728,9 @@ app.get('/api/project/local/:username', /*#__PURE__*/function () {
         case 4:
           _context1.p = 4;
           _t1 = _context1.v;
-          console.error('Fetch local projects error:', _t1);
+          console.error("Fetch local projects error:", _t1);
           res.status(500).json({
-            error: 'Failed to fetch local projects.'
+            error: "Failed to fetch local projects."
           });
         case 5:
           return _context1.a(2);
@@ -735,7 +743,7 @@ app.get('/api/project/local/:username', /*#__PURE__*/function () {
 }());
 
 // ======== CREATE Project
-app.post('/api/project/', /*#__PURE__*/function () {
+app.post("/api/project/", /*#__PURE__*/function () {
   var _ref10 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(req, res) {
     var _req$body2, name, description, owner, members, type, hashtags, userExists, projectDoc, result, _t10;
     return _regenerator().w(function (_context10) {
@@ -748,11 +756,11 @@ app.post('/api/project/', /*#__PURE__*/function () {
             break;
           }
           return _context10.a(2, res.status(400).json({
-            error: 'Name and owner are required.'
+            error: "Name and owner are required."
           }));
         case 1:
           _context10.n = 2;
-          return queryDB('users', 'find', {
+          return queryDB("users", "find", {
             query: {
               username: owner
             }
@@ -764,31 +772,34 @@ app.post('/api/project/', /*#__PURE__*/function () {
             break;
           }
           return _context10.a(2, res.status(400).json({
-            error: 'Owner does not exist.'
+            error: "Owner does not exist."
           }));
         case 3:
           projectDoc = {
             name: name,
-            description: description || '',
+            description: description || "",
             owner: owner,
             members: members || [],
-            type: type || 'unspecified',
+            type: type || "unspecified",
             hashtags: hashtags || [],
-            image: '',
-            status: 'checkedIn',
-            version: 1,
-            checkedOutBy: '',
             files: [],
+            version: 1,
+            status: "checkedIn",
+            // consistent casing
+            checkedOutBy: "",
+            activity: [],
+            imageUrl: "",
+            discussion: [],
             createdAt: new Date()
           };
           _context10.n = 4;
-          return queryDB('projects', 'insertOne', {
+          return queryDB("projects", "insertOne", {
             doc: projectDoc
           });
         case 4:
           result = _context10.v;
           res.status(201).json({
-            message: 'Project created successfully',
+            message: "Project created successfully",
             result: result
           });
           _context10.n = 6;
@@ -796,9 +807,9 @@ app.post('/api/project/', /*#__PURE__*/function () {
         case 5:
           _context10.p = 5;
           _t10 = _context10.v;
-          console.error('Create project error:', _t10);
+          console.error("Create project error:", _t10);
           res.status(500).json({
-            error: 'Internal server error during project creation.'
+            error: "Internal server error during project creation."
           });
         case 6:
           return _context10.a(2);
@@ -810,14 +821,14 @@ app.post('/api/project/', /*#__PURE__*/function () {
   };
 }());
 
-// ======== UPLOAD project name
-app.post('/api/project/:id/image', upload.single('projectImage'), /*#__PURE__*/function () {
+// ======== UPLOAD project image
+app.post("/api/project/:id/image", upload.single("projectImage"), /*#__PURE__*/function () {
   var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(req, res) {
     var id, _t11;
     return _regenerator().w(function (_context11) {
       while (1) switch (_context11.p = _context11.n) {
         case 0:
-          console.log('Uploading image for project', req.params.id, req.file);
+          console.log("Uploading image for project", req.params.id, req.file);
           _context11.p = 1;
           id = new ObjectId(req.params.id);
           if (req.file) {
@@ -825,23 +836,23 @@ app.post('/api/project/:id/image', upload.single('projectImage'), /*#__PURE__*/f
             break;
           }
           return _context11.a(2, res.status(400).json({
-            error: 'No image uploaded.'
+            error: "No image uploaded."
           }));
         case 2:
           _context11.n = 3;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
             update: {
               $set: {
-                image: req.file.filename
+                imageUrl: req.file.filename
               }
             }
           });
         case 3:
           res.json({
-            message: 'Project image uploaded.',
+            message: "Project image uploaded.",
             file: req.file.filename
           });
           _context11.n = 5;
@@ -849,9 +860,9 @@ app.post('/api/project/:id/image', upload.single('projectImage'), /*#__PURE__*/f
         case 4:
           _context11.p = 4;
           _t11 = _context11.v;
-          console.error('Image upload error:', _t11);
+          console.error("Image upload error:", _t11);
           res.status(500).json({
-            error: 'Failed to upload project image.'
+            error: "Failed to upload project image."
           });
         case 5:
           return _context11.a(2);
@@ -864,7 +875,7 @@ app.post('/api/project/:id/image', upload.single('projectImage'), /*#__PURE__*/f
 }());
 
 // ======== ADD file to project
-app.post('/api/project/:id/files', upload.single('file'), /*#__PURE__*/function () {
+app.post("/api/project/:id/files", upload.single("file"), /*#__PURE__*/function () {
   var _ref12 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(req, res) {
     var id, fileInfo, _t12;
     return _regenerator().w(function (_context12) {
@@ -877,16 +888,18 @@ app.post('/api/project/:id/files', upload.single('file'), /*#__PURE__*/function 
             break;
           }
           return _context12.a(2, res.status(400).json({
-            error: 'No file uploaded.'
+            error: "No file uploaded."
           }));
         case 1:
           fileInfo = {
-            fileName: req.file.originalname,
+            filename: req.file.originalname,
             fileUrl: req.file.filename,
+            fileType: req.file.mimetype,
+            size: req.file.size,
             uploadedAt: new Date()
           };
           _context12.n = 2;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
@@ -898,7 +911,7 @@ app.post('/api/project/:id/files', upload.single('file'), /*#__PURE__*/function 
           });
         case 2:
           res.json({
-            message: 'File uploaded.',
+            message: "File uploaded.",
             file: fileInfo
           });
           _context12.n = 4;
@@ -906,9 +919,9 @@ app.post('/api/project/:id/files', upload.single('file'), /*#__PURE__*/function 
         case 3:
           _context12.p = 3;
           _t12 = _context12.v;
-          console.error('File upload error:', _t12);
+          console.error("File upload error:", _t12);
           res.status(500).json({
-            error: 'Failed to upload file.'
+            error: "Failed to upload file."
           });
         case 4:
           return _context12.a(2);
@@ -921,7 +934,7 @@ app.post('/api/project/:id/files', upload.single('file'), /*#__PURE__*/function 
 }());
 
 // ======== DELETE file from project
-app["delete"]('/api/project/:id/files/:fileName', /*#__PURE__*/function () {
+app["delete"]("/api/project/:id/files/:fileName", /*#__PURE__*/function () {
   var _ref13 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(req, res) {
     var id, fileName, result, _t13;
     return _regenerator().w(function (_context13) {
@@ -931,14 +944,14 @@ app["delete"]('/api/project/:id/files/:fileName', /*#__PURE__*/function () {
           id = new ObjectId(req.params.id);
           fileName = req.params.fileName;
           _context13.n = 1;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
             update: {
               $pull: {
                 files: {
-                  fileName: fileName
+                  filename: fileName
                 }
               }
             }
@@ -950,20 +963,20 @@ app["delete"]('/api/project/:id/files/:fileName', /*#__PURE__*/function () {
             break;
           }
           return _context13.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
           res.json({
-            message: 'File removed successfully.'
+            message: "File removed successfully."
           });
           _context13.n = 4;
           break;
         case 3:
           _context13.p = 3;
           _t13 = _context13.v;
-          console.error('File deletion error:', _t13);
+          console.error("File deletion error:", _t13);
           res.status(500).json({
-            error: 'Failed to delete file.'
+            error: "Failed to delete file."
           });
         case 4:
           return _context13.a(2);
@@ -976,7 +989,7 @@ app["delete"]('/api/project/:id/files/:fileName', /*#__PURE__*/function () {
 }());
 
 // ======== CHECK OUT project
-app.patch('/api/project/:id/checkout', /*#__PURE__*/function () {
+app.patch("/api/project/:id/checkout", /*#__PURE__*/function () {
   var _ref14 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14(req, res) {
     var id, username, project, _t14;
     return _regenerator().w(function (_context14) {
@@ -986,7 +999,7 @@ app.patch('/api/project/:id/checkout', /*#__PURE__*/function () {
           id = new ObjectId(req.params.id);
           username = req.body.username;
           _context14.n = 1;
-          return queryDB('projects', 'find', {
+          return queryDB("projects", "find", {
             query: {
               _id: id
             }
@@ -998,26 +1011,34 @@ app.patch('/api/project/:id/checkout', /*#__PURE__*/function () {
             break;
           }
           return _context14.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
-          if (!(project[0].status === 'checkedOut')) {
+          if (!(project[0].status === "checkedOut")) {
             _context14.n = 3;
             break;
           }
           return _context14.a(2, res.status(400).json({
-            error: 'Project already checked out.'
+            error: "Project already checked out."
           }));
         case 3:
           _context14.n = 4;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
             update: {
               $set: {
-                status: 'checkedOut',
+                status: "checkedOut",
                 checkedOutBy: username
+              },
+              $push: {
+                activity: {
+                  user: username,
+                  action: "check-out",
+                  message: "".concat(username, " checked out the project."),
+                  timestamp: new Date()
+                }
               }
             }
           });
@@ -1030,9 +1051,9 @@ app.patch('/api/project/:id/checkout', /*#__PURE__*/function () {
         case 5:
           _context14.p = 5;
           _t14 = _context14.v;
-          console.error('Checkout error:', _t14);
+          console.error("Checkout error:", _t14);
           res.status(500).json({
-            error: 'Failed to check out project.'
+            error: "Failed to check out project."
           });
         case 6:
           return _context14.a(2);
@@ -1045,9 +1066,9 @@ app.patch('/api/project/:id/checkout', /*#__PURE__*/function () {
 }());
 
 // ======== CHECK IN project
-app.patch('/api/project/:id/checkin', /*#__PURE__*/function () {
+app.patch("/api/project/:id/checkin", /*#__PURE__*/function () {
   var _ref15 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15(req, res) {
-    var id, _req$body3, username, message, project, newVersion, checkinDoc, _t15;
+    var id, _req$body3, username, message, project, newVersion, _t15;
     return _regenerator().w(function (_context15) {
       while (1) switch (_context15.p = _context15.n) {
         case 0:
@@ -1055,7 +1076,7 @@ app.patch('/api/project/:id/checkin', /*#__PURE__*/function () {
           id = new ObjectId(req.params.id);
           _req$body3 = req.body, username = _req$body3.username, message = _req$body3.message;
           _context15.n = 1;
-          return queryDB('projects', 'find', {
+          return queryDB("projects", "find", {
             query: {
               _id: id
             }
@@ -1067,7 +1088,7 @@ app.patch('/api/project/:id/checkin', /*#__PURE__*/function () {
             break;
           }
           return _context15.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
           if (!(project[0].checkedOutBy !== username)) {
@@ -1075,54 +1096,49 @@ app.patch('/api/project/:id/checkin', /*#__PURE__*/function () {
             break;
           }
           return _context15.a(2, res.status(400).json({
-            error: 'You did not check out this project.'
+            error: "You did not check out this project."
           }));
         case 3:
           newVersion = project[0].version + 1;
           _context15.n = 4;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
             update: {
               $set: {
-                status: 'checkedIn',
-                checkedOutBy: '',
+                status: "checkedIn",
+                checkedOutBy: "",
                 version: newVersion
+              },
+              $push: {
+                activity: {
+                  user: username,
+                  action: "check-in",
+                  message: message || "Checked in new version",
+                  timestamp: new Date()
+                }
               }
             }
           });
         case 4:
-          //log checkin to separate collection
-          checkinDoc = {
-            projectId: id,
-            username: username,
-            message: message || '',
-            version: newVersion,
-            timestamp: new Date()
-          };
-          _context15.n = 5;
-          return queryDB('checkins', 'insertOne', {
-            doc: checkinDoc
-          });
-        case 5:
           res.json({
-            message: 'Project checked in successfully.',
+            message: "Project checked in successfully.",
             version: newVersion
           });
-          _context15.n = 7;
+          _context15.n = 6;
           break;
-        case 6:
-          _context15.p = 6;
+        case 5:
+          _context15.p = 5;
           _t15 = _context15.v;
-          console.error('Checkin error:', _t15);
+          console.error("Checkin error:", _t15);
           res.status(500).json({
-            error: 'Failed to check in project.'
+            error: "Failed to check in project."
           });
-        case 7:
+        case 6:
           return _context15.a(2);
       }
-    }, _callee15, null, [[0, 6]]);
+    }, _callee15, null, [[0, 5]]);
   }));
   return function (_x32, _x33) {
     return _ref15.apply(this, arguments);
@@ -1130,7 +1146,7 @@ app.patch('/api/project/:id/checkin', /*#__PURE__*/function () {
 }());
 
 // ======== UPDATE project details
-app.patch('/api/project/:id', /*#__PURE__*/function () {
+app.patch("/api/project/:id", /*#__PURE__*/function () {
   var _ref16 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee16(req, res) {
     var id, updates, result, _t16;
     return _regenerator().w(function (_context16) {
@@ -1138,10 +1154,10 @@ app.patch('/api/project/:id', /*#__PURE__*/function () {
         case 0:
           _context16.p = 0;
           id = new ObjectId(req.params.id);
-          updates = req.body; // don’t allow owner changes 
-          delete updates.owner;
+          updates = req.body;
+          delete updates.owner; // owner cannot change
           _context16.n = 1;
-          return queryDB('projects', 'updateOne', {
+          return queryDB("projects", "updateOne", {
             filter: {
               _id: id
             },
@@ -1156,20 +1172,20 @@ app.patch('/api/project/:id', /*#__PURE__*/function () {
             break;
           }
           return _context16.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
           res.json({
-            message: 'Project updated successfully.'
+            message: "Project updated successfully."
           });
           _context16.n = 4;
           break;
         case 3:
           _context16.p = 3;
           _t16 = _context16.v;
-          console.error('Update project error:', _t16);
+          console.error("Update project error:", _t16);
           res.status(500).json({
-            error: 'Failed to update project.'
+            error: "Failed to update project."
           });
         case 4:
           return _context16.a(2);
@@ -1182,17 +1198,17 @@ app.patch('/api/project/:id', /*#__PURE__*/function () {
 }());
 
 // ======== DELETE project
-app["delete"]('/api/project/:id', /*#__PURE__*/function () {
+app["delete"]("/api/project/:id", /*#__PURE__*/function () {
   var _ref17 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee17(req, res) {
     var id, result, _t17;
     return _regenerator().w(function (_context17) {
       while (1) switch (_context17.p = _context17.n) {
         case 0:
           _context17.p = 0;
-          id = new ObjectId(req.params.id);
+          id = new ObjectId(req.params.id); // use 'delete' instead of 'deleteOne'
           _context17.n = 1;
-          return queryDB('projects', 'deleteOne', {
-            filter: {
+          return queryDB("projects", "delete", {
+            query: {
               _id: id
             }
           });
@@ -1203,27 +1219,27 @@ app["delete"]('/api/project/:id', /*#__PURE__*/function () {
             break;
           }
           return _context17.a(2, res.status(404).json({
-            error: 'Project not found.'
+            error: "Project not found."
           }));
         case 2:
           _context17.n = 3;
-          return queryDB('checkins', 'deleteOne', {
-            filter: {
+          return queryDB("checkins", "delete", {
+            query: {
               projectId: id
             }
           });
         case 3:
           res.json({
-            message: 'Project deleted successfully.'
+            message: "Project deleted successfully."
           });
           _context17.n = 5;
           break;
         case 4:
           _context17.p = 4;
           _t17 = _context17.v;
-          console.error('Delete project error:', _t17);
+          console.error("Delete project error:", _t17);
           res.status(500).json({
-            error: 'Failed to delete project.'
+            error: "Failed to delete project."
           });
         case 5:
           return _context17.a(2);

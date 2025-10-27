@@ -23,23 +23,30 @@ const ProjectPreview = ({ title, description, owner, lastEdited, image, hashtags
 export default ProjectPreview;
 
 
+
+
+
+
+//GOES TO THE PROJECT PAGE WHEN CLICKED
+
 // import React from "react";
-// // import "../styling/feed.css";
+// import { useNavigate } from "react-router-dom";
 
-// //project preview componentnot
+// const ProjectPreview = ({ project }) => {
+//   const navigate = useNavigate();
 
-// const ProjectPreview = ({ title, description, author, lastEdited }) => {
+//   const handleClick = () => {
+//     navigate(`/projects/${project._id}`);
+//   };
+
 //   return (
-//     <div className = "activity-item">
-//       <img src = ""/>
-//       <h3>{title}</h3>
-      
-//       <p>{description}</p>
-//       <small>
-//         By <strong>{author}</strong> | Last edited: {lastEdited}
-//       </small>
+//     <div className="project-card" onClick={handleClick}>
+//       <img src={project.imageUrl} alt={project.name} />
+//       <h3>{project.name}</h3>
+//       <p>{project.description}</p>
 //     </div>
 //   );
 // };
 
 // export default ProjectPreview;
+

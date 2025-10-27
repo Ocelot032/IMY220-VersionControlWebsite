@@ -35,17 +35,32 @@ async function connectDB() {
 async function queryDB(collectionName, operation, data = {}) {
   const db = await connectDB();
   const collection = db.collection(collectionName);
+
   switch (operation) {
     case "find":
-      return await collection.find(data.query || {}, data.options || {}).toArray();
+      return await collection
+        .find(data.query || {}, data.options || {})
+        .toArray();
+
     case "insertOne":
       return await collection.insertOne(data.doc);
+
     case "updateOne":
-      return await collection.updateOne(data.filter, data.update, data.options || {});
+      return await collection.updateOne(
+        data.filter,
+        data.update,
+        data.options || {}
+      );
+
     case "deleteOne":
-      return await collection.deleteOne(data.filter);
+      return await collection.deleteOne(data.filter || data.query || {});
+
+    case "delete":
+      return await collection.deleteMany(data.filter || data.query || {});
+
     case "aggregate":
       return await collection.aggregate(data.pipeline || []).toArray();
+
     default:
       throw new Error("Invalid operation");
   }
@@ -256,67 +271,57 @@ app.post('/api/users/:username/upload', (req, res, next) => {
 });
 
 // ====== PROJECTS
-
 // ======== GET all projects
-app.get('/api/project/', async (req, res) => {
+app.get("/api/project/", async (req, res) => {
   try {
-    const projects = await queryDB('projects', 'find');
+    const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
     res.json(projects);
   } catch (err) {
-    console.error('Fetch projects error:', err);
-    res.status(500).json({ error: 'Failed to fetch projects.' });
+    console.error("Fetch projects error:", err);
+    res.status(500).json({ error: "Failed to fetch projects." });
   }
 });
 
 // ======== GET single project by id
-app.get('/api/project/:id', async (req, res) => {
+app.get("/api/project/:id", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
-    const project = await queryDB('projects', 'find', { query: { _id: id } });
-    if (!project.length) return res.status(404).json({ error: 'Project not found.' });
+    const project = await queryDB("projects", "find", { query: { _id: id } });
+    if (!project.length) return res.status(404).json({ error: "Project not found." });
     res.json(project[0]);
   } catch (err) {
-    console.error('Fetch project error:', err);
-    res.status(500).json({ error: 'Failed to fetch project.' });
+    console.error("Fetch project error:", err);
+    res.status(500).json({ error: "Failed to fetch project." });
   }
 });
 
-
-
 // ======== GET all projects of a specific user (by username)
-app.get('/api/projects/user/:username', async (req, res) => {
+app.get("/api/projects/user/:username", async (req, res) => {
   try {
     const { username } = req.params;
-    const projects = await queryDB('projects', 'find', { query: { owner: username } });
+    const projects = await queryDB("projects", "find", { query: { owner: username } });
 
-    if (!projects.length) {
-      return res.status(404).json({ message: 'No projects found for this user.' });
-    }
+    if (!projects.length)
+      return res.status(404).json({ message: "No projects found for this user." });
 
     res.json(projects);
   } catch (err) {
-    console.error('Error fetching user projects:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error("Error fetching user projects:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
-
-
-
 // ======== GET local projects for a user (friends' projects)
-app.get('/api/project/local/:username', async (req, res) => {
+app.get("/api/project/local/:username", async (req, res) => {
   try {
     const username = req.params.username;
-
-    // find the user to get their friends
-    const userArr = await queryDB('users', 'find', { query: { username } });
-    if (!userArr.length) return res.status(404).json({ error: 'User not found.' });
+    const userArr = await queryDB("users", "find", { query: { username } });
+    if (!userArr.length) return res.status(404).json({ error: "User not found." });
 
     const user = userArr[0];
     const friendUsernames = user.friends || [];
 
-    // find all projects owned by or involving any of the friends
-    const projects = await queryDB('projects', 'find', {
+    const projects = await queryDB("projects", "find", {
       query: {
         $or: [
           { owner: { $in: friendUsernames } },
@@ -328,219 +333,236 @@ app.get('/api/project/local/:username', async (req, res) => {
 
     res.json(projects);
   } catch (err) {
-    console.error('Fetch local projects error:', err);
-    res.status(500).json({ error: 'Failed to fetch local projects.' });
+    console.error("Fetch local projects error:", err);
+    res.status(500).json({ error: "Failed to fetch local projects." });
   }
 });
 
-
-
-
-
-
 // ======== CREATE Project
-app.post('/api/project/', async (req, res) => {
+app.post("/api/project/", async (req, res) => {
   try {
     const { name, description, owner, members, type, hashtags } = req.body;
 
     if (!name || !owner)
-      return res.status(400).json({ error: 'Name and owner are required.' });
+      return res.status(400).json({ error: "Name and owner are required." });
 
-    const userExists = await queryDB('users', 'find', { query: { username: owner } });
+    const userExists = await queryDB("users", "find", { query: { username: owner } });
     if (!userExists.length)
-      return res.status(400).json({ error: 'Owner does not exist.' });
+      return res.status(400).json({ error: "Owner does not exist." });
 
     const projectDoc = {
       name,
-      description: description || '',
+      description: description || "",
       owner,
       members: members || [],
-      type: type || 'unspecified',
+      type: type || "unspecified",
       hashtags: hashtags || [],
-      image: '',
-      status: 'checkedIn',
-      version: 1,
-      checkedOutBy: '',
       files: [],
+      version: 1,
+      status: "checkedIn", // consistent casing
+      checkedOutBy: "",
+      activity: [],
+      imageUrl: "",
+      discussion: [],
       createdAt: new Date(),
     };
 
-    const result = await queryDB('projects', 'insertOne', { doc: projectDoc });
-    res.status(201).json({ message: 'Project created successfully', result });
+    const result = await queryDB("projects", "insertOne", { doc: projectDoc });
+    res.status(201).json({ message: "Project created successfully", result });
   } catch (err) {
-    console.error('Create project error:', err);
-    res.status(500).json({ error: 'Internal server error during project creation.' });
+    console.error("Create project error:", err);
+    res.status(500).json({ error: "Internal server error during project creation." });
   }
 });
 
-// ======== UPLOAD project name
-app.post('/api/project/:id/image', upload.single('projectImage'), async (req, res) => {
-     console.log('Uploading image for project', req.params.id, req.file);
+// ======== UPLOAD project image
+app.post("/api/project/:id/image", upload.single("projectImage"), async (req, res) => {
+  console.log("Uploading image for project", req.params.id, req.file);
   try {
     const id = new ObjectId(req.params.id);
-    if (!req.file) return res.status(400).json({ error: 'No image uploaded.' });
+    if (!req.file) return res.status(400).json({ error: "No image uploaded." });
 
-    await queryDB('projects', 'updateOne', {
+    await queryDB("projects", "updateOne", {
       filter: { _id: id },
-      update: { $set: { image: req.file.filename } },
+      update: { $set: { imageUrl: req.file.filename } },
     });
 
-    res.json({ message: 'Project image uploaded.', file: req.file.filename });
+    res.json({ message: "Project image uploaded.", file: req.file.filename });
   } catch (err) {
-    console.error('Image upload error:', err);
-    res.status(500).json({ error: 'Failed to upload project image.' });
+    console.error("Image upload error:", err);
+    res.status(500).json({ error: "Failed to upload project image." });
   }
 });
 
 // ======== ADD file to project
-app.post('/api/project/:id/files', upload.single('file'), async (req, res) => {
+app.post("/api/project/:id/files", upload.single("file"), async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
 
     const fileInfo = {
-      fileName: req.file.originalname,
+      filename: req.file.originalname,
       fileUrl: req.file.filename,
+      fileType: req.file.mimetype,
+      size: req.file.size,
       uploadedAt: new Date(),
     };
 
-    await queryDB('projects', 'updateOne', {
+    await queryDB("projects", "updateOne", {
       filter: { _id: id },
       update: { $push: { files: fileInfo } },
     });
 
-    res.json({ message: 'File uploaded.', file: fileInfo });
+    res.json({ message: "File uploaded.", file: fileInfo });
   } catch (err) {
-    console.error('File upload error:', err);
-    res.status(500).json({ error: 'Failed to upload file.' });
+    console.error("File upload error:", err);
+    res.status(500).json({ error: "Failed to upload file." });
   }
 });
 
 // ======== DELETE file from project
-app.delete('/api/project/:id/files/:fileName', async (req, res) => {
+app.delete("/api/project/:id/files/:fileName", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
     const { fileName } = req.params;
 
-    const result = await queryDB('projects', 'updateOne', {
+    const result = await queryDB("projects", "updateOne", {
       filter: { _id: id },
-      update: { $pull: { files: { fileName } } },
+      update: { $pull: { files: { filename: fileName } } },
     });
 
     if (result.matchedCount === 0)
-      return res.status(404).json({ error: 'Project not found.' });
+      return res.status(404).json({ error: "Project not found." });
 
-    res.json({ message: 'File removed successfully.' });
+    res.json({ message: "File removed successfully." });
   } catch (err) {
-    console.error('File deletion error:', err);
-    res.status(500).json({ error: 'Failed to delete file.' });
+    console.error("File deletion error:", err);
+    res.status(500).json({ error: "Failed to delete file." });
   }
 });
 
 // ======== CHECK OUT project
-app.patch('/api/project/:id/checkout', async (req, res) => {
+app.patch("/api/project/:id/checkout", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
     const { username } = req.body;
 
-    const project = await queryDB('projects', 'find', { query: { _id: id } });
-    if (!project.length) return res.status(404).json({ error: 'Project not found.' });
+    const project = await queryDB("projects", "find", { query: { _id: id } });
+    if (!project.length) return res.status(404).json({ error: "Project not found." });
 
-    if (project[0].status === 'checkedOut')
-      return res.status(400).json({ error: 'Project already checked out.' });
+    if (project[0].status === "checkedOut")
+      return res.status(400).json({ error: "Project already checked out." });
 
-    await queryDB('projects', 'updateOne', {
+    await queryDB("projects", "updateOne", {
       filter: { _id: id },
-      update: { $set: { status: 'checkedOut', checkedOutBy: username } },
+      update: {
+        $set: {
+          status: "checkedOut",
+          checkedOutBy: username,
+        },
+        $push: {
+          activity: {
+            user: username,
+            action: "check-out",
+            message: `${username} checked out the project.`,
+            timestamp: new Date(),
+          },
+        },
+      },
     });
 
     res.json({ message: `Project checked out by ${username}.` });
   } catch (err) {
-    console.error('Checkout error:', err);
-    res.status(500).json({ error: 'Failed to check out project.' });
+    console.error("Checkout error:", err);
+    res.status(500).json({ error: "Failed to check out project." });
   }
 });
 
 // ======== CHECK IN project
-app.patch('/api/project/:id/checkin', async (req, res) => {
+app.patch("/api/project/:id/checkin", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
     const { username, message } = req.body;
 
-    const project = await queryDB('projects', 'find', { query: { _id: id } });
-    if (!project.length) return res.status(404).json({ error: 'Project not found.' });
+    const project = await queryDB("projects", "find", { query: { _id: id } });
+    if (!project.length) return res.status(404).json({ error: "Project not found." });
 
     if (project[0].checkedOutBy !== username)
-      return res.status(400).json({ error: 'You did not check out this project.' });
+      return res.status(400).json({ error: "You did not check out this project." });
 
     const newVersion = project[0].version + 1;
 
-    await queryDB('projects', 'updateOne', {
+    await queryDB("projects", "updateOne", {
       filter: { _id: id },
       update: {
-        $set: { status: 'checkedIn', checkedOutBy: '', version: newVersion },
+        $set: {
+          status: "checkedIn",
+          checkedOutBy: "",
+          version: newVersion,
+        },
+        $push: {
+          activity: {
+            user: username,
+            action: "check-in",
+            message: message || "Checked in new version",
+            timestamp: new Date(),
+          },
+        },
       },
     });
 
-    //log checkin to separate collection
-    const checkinDoc = {
-      projectId: id,
-      username,
-      message: message || '',
-      version: newVersion,
-      timestamp: new Date(),
-    };
-    await queryDB('checkins', 'insertOne', { doc: checkinDoc });
-
-    res.json({ message: 'Project checked in successfully.', version: newVersion });
+    res.json({ message: "Project checked in successfully.", version: newVersion });
   } catch (err) {
-    console.error('Checkin error:', err);
-    res.status(500).json({ error: 'Failed to check in project.' });
+    console.error("Checkin error:", err);
+    res.status(500).json({ error: "Failed to check in project." });
   }
 });
 
 // ======== UPDATE project details
-app.patch('/api/project/:id', async (req, res) => {
+app.patch("/api/project/:id", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
     const updates = req.body;
 
-    // don’t allow owner changes 
-    delete updates.owner;
+    delete updates.owner; // owner cannot change
 
-    const result = await queryDB('projects', 'updateOne', {
+    const result = await queryDB("projects", "updateOne", {
       filter: { _id: id },
       update: { $set: updates },
     });
 
     if (result.matchedCount === 0)
-      return res.status(404).json({ error: 'Project not found.' });
+      return res.status(404).json({ error: "Project not found." });
 
-    res.json({ message: 'Project updated successfully.' });
+    res.json({ message: "Project updated successfully." });
   } catch (err) {
-    console.error('Update project error:', err);
-    res.status(500).json({ error: 'Failed to update project.' });
+    console.error("Update project error:", err);
+    res.status(500).json({ error: "Failed to update project." });
   }
 });
 
 // ======== DELETE project
-app.delete('/api/project/:id', async (req, res) => {
+app.delete("/api/project/:id", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
-    const result = await queryDB('projects', 'deleteOne', { filter: { _id: id } });
+
+    // use 'delete' instead of 'deleteOne'
+    const result = await queryDB("projects", "delete", { query: { _id: id } });
 
     if (result.deletedCount === 0)
-      return res.status(404).json({ error: 'Project not found.' });
+      return res.status(404).json({ error: "Project not found." });
 
     // also remove related checkins
-    await queryDB('checkins', 'deleteOne', { filter: { projectId: id } });
+    await queryDB("checkins", "delete", { query: { projectId: id } });
 
-    res.json({ message: 'Project deleted successfully.' });
+    res.json({ message: "Project deleted successfully." });
   } catch (err) {
-    console.error('Delete project error:', err);
-    res.status(500).json({ error: 'Failed to delete project.' });
+    console.error("Delete project error:", err);
+    res.status(500).json({ error: "Failed to delete project." });
   }
 });
+
+
 
 // ====== FRIENDS
 

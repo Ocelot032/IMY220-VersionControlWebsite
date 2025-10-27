@@ -36,7 +36,7 @@ const App = () => {
           }
         />
         <Route
-          path="/projects"
+          path="/projects:projectId"
           element={
             <ProtectedRoute>
               <Projects />
