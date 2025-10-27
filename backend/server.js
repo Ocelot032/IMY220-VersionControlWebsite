@@ -453,23 +453,23 @@ app.patch("/api/project/:id/checkout", async (req, res) => {
     if (project[0].status === "checkedOut")
       return res.status(400).json({ error: "Project already checked out." });
 
+    // update status and lock to user
     await queryDB("projects", "updateOne", {
       filter: { _id: id },
-      update: {
-        $set: {
-          status: "checkedOut",
-          checkedOutBy: username,
-        },
-        $push: {
-          activity: {
-            user: username,
-            action: "check-out",
-            message: `${username} checked out the project.`,
-            timestamp: new Date(),
-          },
-        },
-      },
+      update: { $set: { status: "checkedOut", checkedOutBy: username } },
     });
+
+    // log the activity
+    const activityDoc = {
+      projectId: id,
+      username,
+      action: "check-out",
+      message: `${username} checked out the project.`,
+      version: project[0].version,
+      timestamp: new Date(),
+    };
+
+    await queryDB("activity", "insertOne", { doc: activityDoc });
 
     res.json({ message: `Project checked out by ${username}.` });
   } catch (err) {
@@ -477,6 +477,7 @@ app.patch("/api/project/:id/checkout", async (req, res) => {
     res.status(500).json({ error: "Failed to check out project." });
   }
 });
+
 
 // ======== CHECK IN project
 app.patch("/api/project/:id/checkin", async (req, res) => {
@@ -495,21 +496,21 @@ app.patch("/api/project/:id/checkin", async (req, res) => {
     await queryDB("projects", "updateOne", {
       filter: { _id: id },
       update: {
-        $set: {
-          status: "checkedIn",
-          checkedOutBy: "",
-          version: newVersion,
-        },
-        $push: {
-          activity: {
-            user: username,
-            action: "check-in",
-            message: message || "Checked in new version",
-            timestamp: new Date(),
-          },
-        },
+        $set: { status: "checkedIn", checkedOutBy: "", version: newVersion },
       },
     });
+
+    // log the activity
+    const activityDoc = {
+      projectId: id,
+      username,
+      action: "check-in",
+      message: message || "Checked in new version.",
+      version: newVersion,
+      timestamp: new Date(),
+    };
+
+    await queryDB("activity", "insertOne", { doc: activityDoc });
 
     res.json({ message: "Project checked in successfully.", version: newVersion });
   } catch (err) {
@@ -517,6 +518,7 @@ app.patch("/api/project/:id/checkin", async (req, res) => {
     res.status(500).json({ error: "Failed to check in project." });
   }
 });
+
 
 // ======== UPDATE project details
 app.patch("/api/project/:id", async (req, res) => {
@@ -552,8 +554,8 @@ app.delete("/api/project/:id", async (req, res) => {
     if (result.deletedCount === 0)
       return res.status(404).json({ error: "Project not found." });
 
-    // also remove related checkins
-    await queryDB("checkins", "delete", { query: { projectId: id } });
+    // also remove related activity
+    await queryDB("activity", "delete", { query: { projectId: id } });
 
     res.json({ message: "Project deleted successfully." });
   } catch (err) {
@@ -761,130 +763,73 @@ app.get('/api/friends/:username/pending', async (req, res) => {
   }
 });
 
+// ====== ACTIVITY
 
-// ====== CHECKINS
-
-// ======== GET all checkins
-app.get('/api/checkins/', async (req, res) => {
+// ======== GET all activity (global feed)
+app.get("/api/activity", async (req, res) => {
   try {
-    const checkins = await queryDB('checkins', 'find', {
+    const activity = await queryDB("activity", "find", {
       query: {},
       options: { sort: { timestamp: -1 } },
     });
-    res.json(checkins);
+    res.json(activity);
   } catch (err) {
-    console.error('Fetch checkins error:', err);
-    res.status(500).json({ error: 'Failed to fetch check-ins.' });
+    console.error("Fetch activity error:", err);
+    res.status(500).json({ error: "Failed to fetch activity." });
   }
 });
 
-// ======== GET checkins by project
-app.get('/api/checkins/project/:projectId', async (req, res) => {
+// ======== GET activity for a specific project
+app.get("/api/activity/project/:projectId", async (req, res) => {
   try {
-    const projectId = req.params.projectId;
+    const { projectId } = req.params;
     if (!ObjectId.isValid(projectId))
-      return res.status(400).json({ error: 'Invalid project ID format.' });
+      return res.status(400).json({ error: "Invalid project ID format." });
 
-    const checkins = await queryDB('checkins', 'find', {
+    const activity = await queryDB("activity", "find", {
       query: { projectId: new ObjectId(projectId) },
       options: { sort: { timestamp: -1 } },
     });
 
-    if (!checkins.length)
-      return res.status(404).json({ error: 'No check-ins found for this project.' });
-
-    res.json(checkins);
+    res.json(activity);
   } catch (err) {
-    console.error('Fetch project checkins error:', err);
-    res.status(500).json({ error: 'Failed to fetch project check-ins.' });
+    console.error("Fetch project activity error:", err);
+    res.status(500).json({ error: "Failed to fetch project activity." });
   }
 });
 
-// ======== GET checkins by user
-app.get('/api/checkins/user/:username', async (req, res) => {
+// ======== GET activity by user
+app.get("/api/activity/user/:username", async (req, res) => {
   try {
-    const username = req.params.username;
-
-    const checkins = await queryDB('checkins', 'find', {
+    const { username } = req.params;
+    const activity = await queryDB("activity", "find", {
       query: { username },
       options: { sort: { timestamp: -1 } },
     });
-
-    if (!checkins.length)
-      return res.status(404).json({ error: 'No check-ins found for this user.' });
-
-    res.json(checkins);
+    res.json(activity);
   } catch (err) {
-    console.error('Fetch user checkins error:', err);
-    res.status(500).json({ error: 'Failed to fetch user check-ins.' });
+    console.error("Fetch user activity error:", err);
+    res.status(500).json({ error: "Failed to fetch user activity." });
   }
 });
 
-// ======== ADD new chicken
-// This will usually be triggered automatically by the project check-in route
-// but we include it here for testing or manual use
-app.post('/api/checkins/', async (req, res) => {
+// ======== DELETE all activity for a project (cleanup)
+app.delete("/api/activity/project/:projectId", async (req, res) => {
   try {
-    const { projectId, username, message, version } = req.body;
-
-    if (!projectId || !username)
-      return res.status(400).json({ error: 'projectId and username required.' });
-
-    if (!ObjectId.isValid(projectId))
-      return res.status(400).json({ error: 'Invalid project ID format.' });
-
-    const checkinDoc = {
-      projectId: new ObjectId(projectId),
-      username,
-      message: message || '',
-      version: version || 1,
-      timestamp: new Date(),
-    };
-
-    const result = await queryDB('checkins', 'insertOne', { doc: checkinDoc });
-    res.status(201).json({ message: 'Check-in logged successfully.', result });
+    const id = new ObjectId(req.params.projectId);
+    await queryDB("activity", "deleteMany", { query: { projectId: id } });
+    res.json({ message: "Activity deleted successfully." });
   } catch (err) {
-    console.error('Add checkin error:', err);
-    res.status(500).json({ error: 'Failed to log check-in.' });
+    console.error("Delete activity error:", err);
+    res.status(500).json({ error: "Failed to delete activity." });
   }
 });
 
-// ======== DELETE chicken
-app.delete('/api/checkins/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    if (!ObjectId.isValid(id))
-      return res.status(400).json({ error: 'Invalid check-in ID format.' });
-
-    const result = await queryDB('checkins', 'deleteOne', {
-      filter: { _id: new ObjectId(id) },
-    });
-
-    if (result.deletedCount === 0)
-      return res.status(404).json({ error: 'Check-in not found.' });
-
-    res.json({ message: 'Check-in deleted successfully.' });
-  } catch (err) {
-    console.error('Delete checkin error:', err);
-    res.status(500).json({ error: 'Failed to delete check-in.' });
-  }
-});
 
 
 
 // Quick sanity route
 app.get("/api", (req, res) => res.json({ message: "API working successfully" }));
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -902,18 +847,6 @@ app.get(/^\/(?!api).*/, (req, res) => {
 // app.get(/^\/(?!api).*/, (req, res) => {
 //   res.sendFile(path.join(projectRoot, "frontend", "dist", "index.html"));
 // });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

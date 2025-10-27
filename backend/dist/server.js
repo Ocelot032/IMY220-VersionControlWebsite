@@ -23,52 +23,52 @@ function connectDB() {
   return _connectDB.apply(this, arguments);
 } // ==================== Query helper ====================
 function _connectDB() {
-  _connectDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee29() {
-    var _t29;
-    return _regenerator().w(function (_context29) {
-      while (1) switch (_context29.p = _context29.n) {
+  _connectDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee28() {
+    var _t28;
+    return _regenerator().w(function (_context28) {
+      while (1) switch (_context28.p = _context28.n) {
         case 0:
           if (!db) {
-            _context29.n = 1;
+            _context28.n = 1;
             break;
           }
-          return _context29.a(2, db);
+          return _context28.a(2, db);
         case 1:
-          _context29.p = 1;
-          _context29.n = 2;
+          _context28.p = 1;
+          _context28.n = 2;
           return client.connect();
         case 2:
           db = client.db("Zynthex");
           console.log("MongoDB Connected");
-          _context29.n = 3;
+          _context28.n = 3;
           return db.collection("users").createIndex({
             username: 1
           }, {
             unique: true
           });
         case 3:
-          _context29.n = 4;
+          _context28.n = 4;
           return db.collection("users").createIndex({
             email: 1
           }, {
             unique: true
           });
         case 4:
-          _context29.n = 5;
+          _context28.n = 5;
           return db.collection("projects").createIndex({
             owner: 1
           });
         case 5:
-          return _context29.a(2, db);
+          return _context28.a(2, db);
         case 6:
-          _context29.p = 6;
-          _t29 = _context29.v;
-          console.error("MongoDB Connection error", _t29);
-          throw _t29;
+          _context28.p = 6;
+          _t28 = _context28.v;
+          console.error("MongoDB Connection error", _t28);
+          throw _t28;
         case 7:
-          return _context29.a(2);
+          return _context28.a(2);
       }
-    }, _callee29, null, [[1, 6]]);
+    }, _callee28, null, [[1, 6]]);
   }));
   return _connectDB.apply(this, arguments);
 }
@@ -76,60 +76,60 @@ function queryDB(_x, _x2) {
   return _queryDB.apply(this, arguments);
 } // ==================== Express app setup ====================
 function _queryDB() {
-  _queryDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee30(collectionName, operation) {
+  _queryDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee29(collectionName, operation) {
     var data,
       db,
       collection,
-      _args30 = arguments,
-      _t30;
-    return _regenerator().w(function (_context30) {
-      while (1) switch (_context30.n) {
+      _args29 = arguments,
+      _t29;
+    return _regenerator().w(function (_context29) {
+      while (1) switch (_context29.n) {
         case 0:
-          data = _args30.length > 2 && _args30[2] !== undefined ? _args30[2] : {};
-          _context30.n = 1;
+          data = _args29.length > 2 && _args29[2] !== undefined ? _args29[2] : {};
+          _context29.n = 1;
           return connectDB();
         case 1:
-          db = _context30.v;
+          db = _context29.v;
           collection = db.collection(collectionName);
-          _t30 = operation;
-          _context30.n = _t30 === "find" ? 2 : _t30 === "insertOne" ? 4 : _t30 === "updateOne" ? 6 : _t30 === "deleteOne" ? 8 : _t30 === "delete" ? 10 : _t30 === "aggregate" ? 12 : 14;
+          _t29 = operation;
+          _context29.n = _t29 === "find" ? 2 : _t29 === "insertOne" ? 4 : _t29 === "updateOne" ? 6 : _t29 === "deleteOne" ? 8 : _t29 === "delete" ? 10 : _t29 === "aggregate" ? 12 : 14;
           break;
         case 2:
-          _context30.n = 3;
+          _context29.n = 3;
           return collection.find(data.query || {}, data.options || {}).toArray();
         case 3:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 4:
-          _context30.n = 5;
+          _context29.n = 5;
           return collection.insertOne(data.doc);
         case 5:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 6:
-          _context30.n = 7;
+          _context29.n = 7;
           return collection.updateOne(data.filter, data.update, data.options || {});
         case 7:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 8:
-          _context30.n = 9;
+          _context29.n = 9;
           return collection.deleteOne(data.filter || data.query || {});
         case 9:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 10:
-          _context30.n = 11;
+          _context29.n = 11;
           return collection.deleteMany(data.filter || data.query || {});
         case 11:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 12:
-          _context30.n = 13;
+          _context29.n = 13;
           return collection.aggregate(data.pipeline || []).toArray();
         case 13:
-          return _context30.a(2, _context30.v);
+          return _context29.a(2, _context29.v);
         case 14:
           throw new Error("Invalid operation");
         case 15:
-          return _context30.a(2);
+          return _context29.a(2);
       }
-    }, _callee30);
+    }, _callee29);
   }));
   return _queryDB.apply(this, arguments);
 }
@@ -991,7 +991,7 @@ app["delete"]("/api/project/:id/files/:fileName", /*#__PURE__*/function () {
 // ======== CHECK OUT project
 app.patch("/api/project/:id/checkout", /*#__PURE__*/function () {
   var _ref14 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14(req, res) {
-    var id, username, project, _t14;
+    var id, username, project, activityDoc, _t14;
     return _regenerator().w(function (_context14) {
       while (1) switch (_context14.p = _context14.n) {
         case 0:
@@ -1031,34 +1031,40 @@ app.patch("/api/project/:id/checkout", /*#__PURE__*/function () {
               $set: {
                 status: "checkedOut",
                 checkedOutBy: username
-              },
-              $push: {
-                activity: {
-                  user: username,
-                  action: "check-out",
-                  message: "".concat(username, " checked out the project."),
-                  timestamp: new Date()
-                }
               }
             }
           });
         case 4:
+          // log the activity
+          activityDoc = {
+            projectId: id,
+            username: username,
+            action: "check-out",
+            message: "".concat(username, " checked out the project."),
+            version: project[0].version,
+            timestamp: new Date()
+          };
+          _context14.n = 5;
+          return queryDB("activity", "insertOne", {
+            doc: activityDoc
+          });
+        case 5:
           res.json({
             message: "Project checked out by ".concat(username, ".")
           });
-          _context14.n = 6;
+          _context14.n = 7;
           break;
-        case 5:
-          _context14.p = 5;
+        case 6:
+          _context14.p = 6;
           _t14 = _context14.v;
           console.error("Checkout error:", _t14);
           res.status(500).json({
             error: "Failed to check out project."
           });
-        case 6:
+        case 7:
           return _context14.a(2);
       }
-    }, _callee14, null, [[0, 5]]);
+    }, _callee14, null, [[0, 6]]);
   }));
   return function (_x30, _x31) {
     return _ref14.apply(this, arguments);
@@ -1068,7 +1074,7 @@ app.patch("/api/project/:id/checkout", /*#__PURE__*/function () {
 // ======== CHECK IN project
 app.patch("/api/project/:id/checkin", /*#__PURE__*/function () {
   var _ref15 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15(req, res) {
-    var id, _req$body3, username, message, project, newVersion, _t15;
+    var id, _req$body3, username, message, project, newVersion, activityDoc, _t15;
     return _regenerator().w(function (_context15) {
       while (1) switch (_context15.p = _context15.n) {
         case 0:
@@ -1110,35 +1116,41 @@ app.patch("/api/project/:id/checkin", /*#__PURE__*/function () {
                 status: "checkedIn",
                 checkedOutBy: "",
                 version: newVersion
-              },
-              $push: {
-                activity: {
-                  user: username,
-                  action: "check-in",
-                  message: message || "Checked in new version",
-                  timestamp: new Date()
-                }
               }
             }
           });
         case 4:
+          // log the activity
+          activityDoc = {
+            projectId: id,
+            username: username,
+            action: "check-in",
+            message: message || "Checked in new version.",
+            version: newVersion,
+            timestamp: new Date()
+          };
+          _context15.n = 5;
+          return queryDB("activity", "insertOne", {
+            doc: activityDoc
+          });
+        case 5:
           res.json({
             message: "Project checked in successfully.",
             version: newVersion
           });
-          _context15.n = 6;
+          _context15.n = 7;
           break;
-        case 5:
-          _context15.p = 5;
+        case 6:
+          _context15.p = 6;
           _t15 = _context15.v;
           console.error("Checkin error:", _t15);
           res.status(500).json({
             error: "Failed to check in project."
           });
-        case 6:
+        case 7:
           return _context15.a(2);
       }
-    }, _callee15, null, [[0, 5]]);
+    }, _callee15, null, [[0, 6]]);
   }));
   return function (_x32, _x33) {
     return _ref15.apply(this, arguments);
@@ -1223,7 +1235,7 @@ app["delete"]("/api/project/:id", /*#__PURE__*/function () {
           }));
         case 2:
           _context17.n = 3;
-          return queryDB("checkins", "delete", {
+          return queryDB("activity", "delete", {
             query: {
               projectId: id
             }
@@ -1680,18 +1692,18 @@ app.get('/api/friends/:username/pending', /*#__PURE__*/function () {
   };
 }());
 
-// ====== CHECKINS
+// ====== ACTIVITY
 
-// ======== GET all checkins
-app.get('/api/checkins/', /*#__PURE__*/function () {
+// ======== GET all activity (global feed)
+app.get("/api/activity", /*#__PURE__*/function () {
   var _ref24 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee24(req, res) {
-    var checkins, _t24;
+    var activity, _t24;
     return _regenerator().w(function (_context24) {
       while (1) switch (_context24.p = _context24.n) {
         case 0:
           _context24.p = 0;
           _context24.n = 1;
-          return queryDB('checkins', 'find', {
+          return queryDB("activity", "find", {
             query: {},
             options: {
               sort: {
@@ -1700,16 +1712,16 @@ app.get('/api/checkins/', /*#__PURE__*/function () {
             }
           });
         case 1:
-          checkins = _context24.v;
-          res.json(checkins);
+          activity = _context24.v;
+          res.json(activity);
           _context24.n = 3;
           break;
         case 2:
           _context24.p = 2;
           _t24 = _context24.v;
-          console.error('Fetch checkins error:', _t24);
+          console.error("Fetch activity error:", _t24);
           res.status(500).json({
-            error: 'Failed to fetch check-ins.'
+            error: "Failed to fetch activity."
           });
         case 3:
           return _context24.a(2);
@@ -1721,10 +1733,10 @@ app.get('/api/checkins/', /*#__PURE__*/function () {
   };
 }());
 
-// ======== GET checkins by project
-app.get('/api/checkins/project/:projectId', /*#__PURE__*/function () {
+// ======== GET activity for a specific project
+app.get("/api/activity/project/:projectId", /*#__PURE__*/function () {
   var _ref25 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee25(req, res) {
-    var projectId, checkins, _t25;
+    var projectId, activity, _t25;
     return _regenerator().w(function (_context25) {
       while (1) switch (_context25.p = _context25.n) {
         case 0:
@@ -1735,11 +1747,11 @@ app.get('/api/checkins/project/:projectId', /*#__PURE__*/function () {
             break;
           }
           return _context25.a(2, res.status(400).json({
-            error: 'Invalid project ID format.'
+            error: "Invalid project ID format."
           }));
         case 1:
           _context25.n = 2;
-          return queryDB('checkins', 'find', {
+          return queryDB("activity", "find", {
             query: {
               projectId: new ObjectId(projectId)
             },
@@ -1750,46 +1762,38 @@ app.get('/api/checkins/project/:projectId', /*#__PURE__*/function () {
             }
           });
         case 2:
-          checkins = _context25.v;
-          if (checkins.length) {
-            _context25.n = 3;
-            break;
-          }
-          return _context25.a(2, res.status(404).json({
-            error: 'No check-ins found for this project.'
-          }));
-        case 3:
-          res.json(checkins);
-          _context25.n = 5;
+          activity = _context25.v;
+          res.json(activity);
+          _context25.n = 4;
           break;
-        case 4:
-          _context25.p = 4;
+        case 3:
+          _context25.p = 3;
           _t25 = _context25.v;
-          console.error('Fetch project checkins error:', _t25);
+          console.error("Fetch project activity error:", _t25);
           res.status(500).json({
-            error: 'Failed to fetch project check-ins.'
+            error: "Failed to fetch project activity."
           });
-        case 5:
+        case 4:
           return _context25.a(2);
       }
-    }, _callee25, null, [[0, 4]]);
+    }, _callee25, null, [[0, 3]]);
   }));
   return function (_x52, _x53) {
     return _ref25.apply(this, arguments);
   };
 }());
 
-// ======== GET checkins by user
-app.get('/api/checkins/user/:username', /*#__PURE__*/function () {
+// ======== GET activity by user
+app.get("/api/activity/user/:username", /*#__PURE__*/function () {
   var _ref26 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee26(req, res) {
-    var username, checkins, _t26;
+    var username, activity, _t26;
     return _regenerator().w(function (_context26) {
       while (1) switch (_context26.p = _context26.n) {
         case 0:
           _context26.p = 0;
           username = req.params.username;
           _context26.n = 1;
-          return queryDB('checkins', 'find', {
+          return queryDB("activity", "find", {
             query: {
               username: username
             },
@@ -1800,150 +1804,62 @@ app.get('/api/checkins/user/:username', /*#__PURE__*/function () {
             }
           });
         case 1:
-          checkins = _context26.v;
-          if (checkins.length) {
-            _context26.n = 2;
-            break;
-          }
-          return _context26.a(2, res.status(404).json({
-            error: 'No check-ins found for this user.'
-          }));
-        case 2:
-          res.json(checkins);
-          _context26.n = 4;
+          activity = _context26.v;
+          res.json(activity);
+          _context26.n = 3;
           break;
-        case 3:
-          _context26.p = 3;
+        case 2:
+          _context26.p = 2;
           _t26 = _context26.v;
-          console.error('Fetch user checkins error:', _t26);
+          console.error("Fetch user activity error:", _t26);
           res.status(500).json({
-            error: 'Failed to fetch user check-ins.'
+            error: "Failed to fetch user activity."
           });
-        case 4:
+        case 3:
           return _context26.a(2);
       }
-    }, _callee26, null, [[0, 3]]);
+    }, _callee26, null, [[0, 2]]);
   }));
   return function (_x54, _x55) {
     return _ref26.apply(this, arguments);
   };
 }());
 
-// ======== ADD new chicken
-// This will usually be triggered automatically by the project check-in route
-// but we include it here for testing or manual use
-app.post('/api/checkins/', /*#__PURE__*/function () {
+// ======== DELETE all activity for a project (cleanup)
+app["delete"]("/api/activity/project/:projectId", /*#__PURE__*/function () {
   var _ref27 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee27(req, res) {
-    var _req$body6, projectId, username, message, version, checkinDoc, result, _t27;
+    var id, _t27;
     return _regenerator().w(function (_context27) {
       while (1) switch (_context27.p = _context27.n) {
         case 0:
           _context27.p = 0;
-          _req$body6 = req.body, projectId = _req$body6.projectId, username = _req$body6.username, message = _req$body6.message, version = _req$body6.version;
-          if (!(!projectId || !username)) {
-            _context27.n = 1;
-            break;
-          }
-          return _context27.a(2, res.status(400).json({
-            error: 'projectId and username required.'
-          }));
+          id = new ObjectId(req.params.projectId);
+          _context27.n = 1;
+          return queryDB("activity", "deleteMany", {
+            query: {
+              projectId: id
+            }
+          });
         case 1:
-          if (ObjectId.isValid(projectId)) {
-            _context27.n = 2;
-            break;
-          }
-          return _context27.a(2, res.status(400).json({
-            error: 'Invalid project ID format.'
-          }));
-        case 2:
-          checkinDoc = {
-            projectId: new ObjectId(projectId),
-            username: username,
-            message: message || '',
-            version: version || 1,
-            timestamp: new Date()
-          };
+          res.json({
+            message: "Activity deleted successfully."
+          });
           _context27.n = 3;
-          return queryDB('checkins', 'insertOne', {
-            doc: checkinDoc
+          break;
+        case 2:
+          _context27.p = 2;
+          _t27 = _context27.v;
+          console.error("Delete activity error:", _t27);
+          res.status(500).json({
+            error: "Failed to delete activity."
           });
         case 3:
-          result = _context27.v;
-          res.status(201).json({
-            message: 'Check-in logged successfully.',
-            result: result
-          });
-          _context27.n = 5;
-          break;
-        case 4:
-          _context27.p = 4;
-          _t27 = _context27.v;
-          console.error('Add checkin error:', _t27);
-          res.status(500).json({
-            error: 'Failed to log check-in.'
-          });
-        case 5:
           return _context27.a(2);
       }
-    }, _callee27, null, [[0, 4]]);
+    }, _callee27, null, [[0, 2]]);
   }));
   return function (_x56, _x57) {
     return _ref27.apply(this, arguments);
-  };
-}());
-
-// ======== DELETE chicken
-app["delete"]('/api/checkins/:id', /*#__PURE__*/function () {
-  var _ref28 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee28(req, res) {
-    var id, result, _t28;
-    return _regenerator().w(function (_context28) {
-      while (1) switch (_context28.p = _context28.n) {
-        case 0:
-          _context28.p = 0;
-          id = req.params.id;
-          if (ObjectId.isValid(id)) {
-            _context28.n = 1;
-            break;
-          }
-          return _context28.a(2, res.status(400).json({
-            error: 'Invalid check-in ID format.'
-          }));
-        case 1:
-          _context28.n = 2;
-          return queryDB('checkins', 'deleteOne', {
-            filter: {
-              _id: new ObjectId(id)
-            }
-          });
-        case 2:
-          result = _context28.v;
-          if (!(result.deletedCount === 0)) {
-            _context28.n = 3;
-            break;
-          }
-          return _context28.a(2, res.status(404).json({
-            error: 'Check-in not found.'
-          }));
-        case 3:
-          res.json({
-            message: 'Check-in deleted successfully.'
-          });
-          _context28.n = 5;
-          break;
-        case 4:
-          _context28.p = 4;
-          _t28 = _context28.v;
-          console.error('Delete checkin error:', _t28);
-          res.status(500).json({
-            error: 'Failed to delete check-in.'
-          });
-        case 5:
-          return _context28.a(2);
-      }
-    }, _callee28, null, [[0, 4]]);
-  }));
-  return function (_x58, _x59) {
-    return _ref28.apply(this, arguments);
   };
 }());
 
