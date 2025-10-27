@@ -6,7 +6,6 @@ import Footer from "../components/Footer";
 const Register = () => {
     return (
         <div>
-            <Header/>
             <main>
                 <h1>Sign Up to Zynthex!</h1>
                 <p>Become a member of the community today!</p>

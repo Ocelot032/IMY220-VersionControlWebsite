@@ -283,6 +283,22 @@ app.get('/api/project/:id', async (req, res) => {
 
 
 
+// ======== GET all projects of a specific user (by username)
+app.get('/api/projects/user/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const projects = await queryDB('projects', 'find', { query: { owner: username } });
+
+    if (!projects.length) {
+      return res.status(404).json({ message: 'No projects found for this user.' });
+    }
+
+    res.json(projects);
+  } catch (err) {
+    console.error('Error fetching user projects:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
 
 
 

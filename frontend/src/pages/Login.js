@@ -6,7 +6,6 @@ import Footer from "../components/Footer";
 const Login = () => {
     return (
         <div>
-            <Header/>
             <div>
                 <h1>Welcome back to Zynthex!</h1>
                 <LoginForm/>
