@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProjectPreview from "../components/ProjectPreview";
 import { AuthContext } from "../context/AuthContext"; // assumes you have this
-// import AuthContext from "../context/AuthContext"; // ❌ default import
+// import AuthContext from "../context/AuthContext"; //  default import
 
 
 const Home = () => {
@@ -15,24 +15,59 @@ const Home = () => {
 
   const { user } = useContext(AuthContext); // logged-in user info
 
+
+
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //       setLoading(true);
+
+  //       // const route = showLocal
+  //       //   ? `/api/projects/local/${user._id}`
+  //       //   : "/api/projects/global";
+
+  //       const route = showLocal
+  //           ? `http://localhost:8080/api/project/local/${user.username}`
+  //           : "http://localhost:8080/api/project/";
+
+  //       const res = await fetch(route);
+  //       const data = await res.json();
+  //       setProjects(data);
+  //     } catch (err) {
+  //       console.error("Error fetching projects:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   if (user) fetchProjects();
+  // }, [showLocal, user]);
+
+
+
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const route = showLocal
-          ? `/api/projects/local/${user._id}`
-          : "/api/projects/global";
-        const res = await fetch(route);
-        const data = await res.json();
-        setProjects(data);
-      } catch (err) {
-        console.error("Error fetching projects:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (user) fetchProjects();
-  }, [showLocal, user]);
+  const fetchProjects = async () => {
+    try {
+      const baseURL = "http://localhost:8080";
+      const route = showLocal
+        ? `${baseURL}/api/project/local/${user.username}`
+        : `${baseURL}/api/project/`;
+
+      const res = await fetch(route);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setProjects(data);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // only fetch when user exists
+  if (user && user.username) fetchProjects();
+}, [showLocal, user]);
+
+
 
   const filtered = projects.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -77,7 +112,7 @@ const Home = () => {
               key={proj._id}
               title={proj.name}
               description={proj.description}
-              author={proj.author?.username || "Unknown"}
+              owner={proj.owner || "Unknown"}
               lastEdited={new Date(proj.createdAt).toLocaleDateString()}
               image={proj.imageUrl}
               hashtags={proj.hashtags}
@@ -92,70 +127,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-// import React, { useState } from "react";
-// import { Link } from "react-router-dom"
-
-// import Header from "../components/Header";
-// import Footer from "../components/Footer";
-
-// const Home = () => {
-//     const [showLocal, setShowLocal] = useState(true);
-
-//     return (
-//         <div>
-//             <Header/>
-
-//             <div className = "feed-toggle">
-//                 <button
-//                     onClick = {() => setShowLocal(true)}
-//                     className = {showLocal ? "active" : ""}
-//                 >
-//                     Local Feed
-//                 </button>
-//                 <button
-//                     onClick = {() => setShowLocal(false)}
-//                     className = {showLocal ? "active" : ""}
-//                 >
-//                     Global Feed
-//                 </button>
-//             </div>
-
-//             <div className = "feed-container">
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//                 <p>Project Name</p>
-//             </div>
-
-//             <span>
-//                 <Link to = "/login">
-//                 <button>Login</button>
-//                 </Link>
-//             </span>
-//             <br/>
-//             <span>
-//                 <Link to = "/register">
-//                 <button>Register</button>
-//                 </Link>
-//             </span>
-
-//             <Footer/>
-//         </div>
-//     );
-// }
-
-// export default Home;

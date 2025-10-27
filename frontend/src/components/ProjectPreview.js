@@ -1,6 +1,6 @@
 import React from "react";
 
-const ProjectPreview = ({ title, description, author, lastEdited, image, hashtags }) => {
+const ProjectPreview = ({ title, description, owner, lastEdited, image, hashtags }) => {
   return (
     <article className="project-preview">
       <img src={image || "/assets/default-project.png"} alt={title} />
@@ -8,7 +8,7 @@ const ProjectPreview = ({ title, description, author, lastEdited, image, hashtag
         <h3>{title}</h3>
         <p>{description}</p>
         <small>
-          By <strong>{author}</strong> | Created: {lastEdited}
+          By <strong>{owner}</strong> | Created: {lastEdited}
         </small>
         <div className="hashtags">
           {hashtags && hashtags.map((tag, i) => (
