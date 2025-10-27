@@ -1947,6 +1947,11 @@ app.get(/^\/(?!api).*/, function (req, res) {
   res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });
 
+// app.use(express.static(path.join(projectRoot, "frontend", "dist")));
+// app.get(/^\/(?!api).*/, (req, res) => {
+//   res.sendFile(path.join(projectRoot, "frontend", "dist", "index.html"));
+// });
+
 // ==================== Error handling ====================
 app.use(function (err, req, res, next) {
   console.error("Unhandled error:", err);

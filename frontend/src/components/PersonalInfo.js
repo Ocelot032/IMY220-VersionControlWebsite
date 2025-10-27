@@ -22,7 +22,7 @@ const PersonalInfo = ({ user, isOwnProfile, editing, onSave, onEditToggle }) => 
     return (
       <div>
         <h2>Edit Profile</h2>
-        {Object.keys(formData).map((key) => (
+        {/* {Object.keys(formData).map((key) => (
           <div key={key}>
             <label>{key}:</label>
             <input
@@ -32,7 +32,21 @@ const PersonalInfo = ({ user, isOwnProfile, editing, onSave, onEditToggle }) => 
               onChange={handleChange}
             />
           </div>
-        ))}
+        ))} */}
+        {Object.keys(formData)
+  .filter((key) => key !== "username" && key !== "email") // 🚫 exclude these
+  .map((key) => (
+    <div key={key}>
+      <label>{key}</label>
+      <input
+        type="text"
+        name={key}
+        value={formData[key] || ""}
+        onChange={handleChange}
+      />
+    </div>
+  ))}
+
         <button onClick={handleSubmit}>Save</button>
         <button onClick={onEditToggle}>Cancel</button>
       </div>

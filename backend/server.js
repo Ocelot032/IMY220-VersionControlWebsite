@@ -854,6 +854,19 @@ app.delete('/api/checkins/:id', async (req, res) => {
 // Quick sanity route
 app.get("/api", (req, res) => res.json({ message: "API working successfully" }));
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ==================== Frontend serving ====================
 // Serve the built or public React files regardless of build mode
 app.use(express.static(path.join(projectRoot, "frontend", "public")));
@@ -863,11 +876,34 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });
 
+// app.use(express.static(path.join(projectRoot, "frontend", "dist")));
+// app.get(/^\/(?!api).*/, (req, res) => {
+//   res.sendFile(path.join(projectRoot, "frontend", "dist", "index.html"));
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ==================== Error handling ====================
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Something went wrong on the server." });
 });
+
+
 
 // ==================== Start server ====================
 connectDB()

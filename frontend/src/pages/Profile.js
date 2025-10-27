@@ -75,22 +75,34 @@ const Profile = () => {
 
   // === Save edited profile ===
   const handleEditSave = async (updatedData) => {
-    try {
-      const res = await fetch(`/api/users/${user.username}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedData),
-      });
-      if (res.ok) {
-        const updatedUser = await res.json();
-        setProfileUser(updatedUser);
-        setEditing(false);
-      }
-    } catch (err) {
-      console.error("Error updating profile:", err);
+  try {
+    const res = await fetch(`/api/users/${user.username}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedData),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to update profile:", res.statusText);
+      return;
     }
-  };
+
+    // success prompt
+    alert("Profile updated successfully!");
+
+    // re-fetch the updated profile from the backend immediately
+    const refreshRes = await fetch(`/api/users/${user.username}`, { credentials: "include" });
+    const refreshedUser = await refreshRes.json();
+
+    setProfileUser(refreshedUser);
+    setEditing(false);
+  } catch (err) {
+    console.error("Error updating profile:", err);
+  }
+};
+
+
 
   // === Send friend request ===
   const handleAddFriend = async () => {
@@ -140,7 +152,8 @@ const Profile = () => {
 
   return (
     <div>
-      <Header />
+      <Header/>
+
 
       <h1>{isOwnProfile ? "My Profile" : `${profileUser.username}'s Profile`}</h1>
 

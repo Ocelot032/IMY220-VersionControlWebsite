@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-const Header = ({user}) => {
-    return (
-        <nav id = "navigation">
-            <h1 id = "headerTitle">ZYNTHEX</h1>
-            <Link to = "/home" className = "navItem">Home</Link>
-            <Link to = "/projects" className = "navItem">Projects</Link>
-            <Link to = "/profile" className = "navItem">Profile</Link>
-        </nav>
-    );
+const Header = () => {
+  const { user } = useContext(AuthContext);
+
+  return (
+    <nav id="navigation">
+      <h1 id="headerTitle">ZYNTHEX</h1>
+
+      <Link to="/home" className="navItem">Home</Link>
+      <Link to="/projects" className="navItem">Projects</Link>
+
+      {user && (
+        <Link to={`/profile/${user.username}`} className="navItem">
+          My Profile
+        </Link>
+      )}
+    </nav>
+  );
 };
 
 export default Header;
- 
