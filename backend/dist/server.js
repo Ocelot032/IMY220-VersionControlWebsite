@@ -148,7 +148,7 @@ app.use(express.urlencoded({
   extended: true
 }));
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:8080"],
   credentials: true
 }));
 app.use(session({
@@ -256,7 +256,7 @@ app.post("/api/users/register", upload.single("profileImg"), /*#__PURE__*/functi
 }());
 app.post("/api/users/login", /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(req, res) {
-    var _req$body, username, password, user, _t2;
+    var _req$body, username, password, users, user, _t2;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.p = _context2.n) {
         case 0:
@@ -278,8 +278,8 @@ app.post("/api/users/login", /*#__PURE__*/function () {
             }
           });
         case 2:
-          user = _context2.v;
-          if (!(user.length === 0)) {
+          users = _context2.v;
+          if (!(users.length === 0)) {
             _context2.n = 3;
             break;
           }
@@ -287,11 +287,16 @@ app.post("/api/users/login", /*#__PURE__*/function () {
             error: "Invalid credentials."
           }));
         case 3:
+          user = users[0]; // ✅ Store full user info in session (especially _id)
           req.session.user = {
-            username: user[0].username,
-            email: user[0].email,
-            isAdmin: user[0].isAdmin
+            _id: user._id,
+            // <-- this is the key fix
+            username: user.username,
+            email: user.email,
+            isAdmin: user.isAdmin || false
           };
+
+          // ✅ Send the same back to frontend
           res.json({
             message: "Login successful",
             user: req.session.user

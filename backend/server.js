@@ -82,7 +82,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:8080"],
     credentials: true,
   })
 );
@@ -156,28 +156,56 @@ app.post("/api/users/register", upload.single("profileImg"), async (req, res) =>
 });
 
 
+
+
+
+
 app.post("/api/users/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    if (!username || !password)
+    if (!username || !password) {
       return res.status(400).json({ error: "Username and password required." });
+    }
 
-    const user = await queryDB("users", "find", { query: { username, password } });
-    if (user.length === 0)
+    const users = await queryDB("users", "find", { query: { username, password } });
+    if (users.length === 0) {
       return res.status(401).json({ error: "Invalid credentials." });
+    }
 
+    const user = users[0];
+
+    // ✅ Store full user info in session (especially _id)
     req.session.user = {
-      username: user[0].username,
-      email: user[0].email,
-      isAdmin: user[0].isAdmin,
+      _id: user._id, // <-- this is the key fix
+      username: user.username,
+      email: user.email,
+      isAdmin: user.isAdmin || false,
     };
 
+    // ✅ Send the same back to frontend
     res.json({ message: "Login successful", user: req.session.user });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Internal server error during login." });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.post("/api/users/logout", (req, res) => {
   if (req.session.user) {
@@ -338,34 +366,6 @@ app.get("/api/projects/user/:username", async (req, res) => {
 });
 
 
-
-
-
-// ======== SAVE a project
-// app.post("/api/projects/save/:id", async (req, res) => {
-//   try {
-//     if (!req.session.user) {
-//       return res.status(401).json({ error: "Not logged in" });
-//     }
-//     const userId = req.session.user._id;
-//     const projectId = req.params.id;
-
-//     const user = await User.findById(userId);
-//     if (!user) return res.status(404).json({ error: "User not found" });
-
-//     if (user.savedProjects.includes(projectId)) {
-//       user.savedProjects.pull(projectId);
-//     } else {
-//       user.savedProjects.push(projectId);
-//     }
-//     await user.save();
-
-//     res.json({ success: true, saved: user.savedProjects });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// })
 // ======== SAVE or UNSAVE a project ======== //
 app.post("/api/projects/save/:id", async (req, res) => {
   try {
