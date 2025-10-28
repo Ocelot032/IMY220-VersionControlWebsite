@@ -174,7 +174,7 @@ app.post("/api/users/login", async (req, res) => {
 
     const user = users[0];
 
-    // ✅ Store full user info in session (especially _id)
+    //  Store full user info in session (especially _id)
     req.session.user = {
       _id: user._id, // <-- this is the key fix
       username: user.username,
@@ -182,25 +182,13 @@ app.post("/api/users/login", async (req, res) => {
       isAdmin: user.isAdmin || false,
     };
 
-    // ✅ Send the same back to frontend
+    //  Send the same back to frontend
     res.json({ message: "Login successful", user: req.session.user });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Internal server error during login." });
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -218,14 +206,6 @@ app.post("/api/users/logout", (req, res) => {
     res.status(400).json({ error: "No active session." });
   }
 });
-
-
-
-
-
-
-
-
 
 
 
@@ -326,10 +306,61 @@ app.post('/api/users/:username/upload', (req, res, next) => {
 
 // ====== PROJECTS
 // ======== GET all projects
+// app.get("/api/project/", async (req, res) => {
+//   try {
+//     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
+//     res.json(projects);
+//   } catch (err) {
+//     console.error("Fetch projects error:", err);
+//     res.status(500).json({ error: "Failed to fetch projects." });
+//   }
+// });
+
+// // ======== GET single project by id
+// app.get("/api/project/:id", async (req, res) => {
+//   try {
+//     const id = new ObjectId(req.params.id);
+//     const project = await queryDB("projects", "find", { query: { _id: id } });
+//     if (!project.length) return res.status(404).json({ error: "Project not found." });
+//     res.json(project[0]);
+//   } catch (err) {
+//     console.error("Fetch project error:", err);
+//     res.status(500).json({ error: "Failed to fetch project." });
+//   }
+// });
+
+
+
+
+
+
+
+
+// ====== PROJECTS
+
+// ======== GET all projects
 app.get("/api/project/", async (req, res) => {
   try {
+    // Fetch all projects sorted by creation date (newest first)
     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
-    res.json(projects);
+
+    // Normalize data to ensure all expected fields exist
+    const normalizedProjects = projects.map((p) => ({
+      _id: p._id,
+      name: p.name || "",
+      description: p.description || "",
+      owner: p.owner || "",
+      type: p.type || "unspecified",
+      hashtags: p.hashtags || [],
+      members: p.members || [],
+      version: p.version || 1,
+      status: p.status || "checkedIn",
+      activity: p.activity || [],
+      imageUrl: p.imageUrl || "",
+      createdAt: p.createdAt || new Date(),
+    }));
+
+    res.json(normalizedProjects);
   } catch (err) {
     console.error("Fetch projects error:", err);
     res.status(500).json({ error: "Failed to fetch projects." });
@@ -340,14 +371,41 @@ app.get("/api/project/", async (req, res) => {
 app.get("/api/project/:id", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
-    const project = await queryDB("projects", "find", { query: { _id: id } });
-    if (!project.length) return res.status(404).json({ error: "Project not found." });
-    res.json(project[0]);
+    const result = await queryDB("projects", "find", { query: { _id: id } });
+
+    if (!result.length) return res.status(404).json({ error: "Project not found." });
+    const p = result[0];
+
+    // Normalize single project
+    const normalizedProject = {
+      _id: p._id,
+      name: p.name || "",
+      description: p.description || "",
+      owner: p.owner || "",
+      type: p.type || "unspecified",
+      hashtags: p.hashtags || [],
+      members: p.members || [],
+      version: p.version || 1,
+      status: p.status || "checkedIn",
+      activity: p.activity || [],
+      imageUrl: p.imageUrl || "",
+      createdAt: p.createdAt || new Date(),
+    };
+
+    res.json(normalizedProject);
   } catch (err) {
     console.error("Fetch project error:", err);
     res.status(500).json({ error: "Failed to fetch project." });
   }
 });
+
+
+
+
+
+
+
+
 
 // ======== GET all projects of a specific user (by username)
 app.get("/api/projects/user/:username", async (req, res) => {
@@ -375,7 +433,7 @@ app.post("/api/projects/save/:id", async (req, res) => {
 
     const db = await connectDB();
     const userId = new ObjectId(req.session.user._id);
-    const projectId = new ObjectId(req.params.id); // ✅ correct for real ObjectIds
+    const projectId = new ObjectId(req.params.id); 
 
     const user = await db.collection("users").findOne({ _id: userId });
     if (!user) return res.status(404).json({ error: "User not found" });

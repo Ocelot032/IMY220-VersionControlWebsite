@@ -287,7 +287,7 @@ app.post("/api/users/login", /*#__PURE__*/function () {
             error: "Invalid credentials."
           }));
         case 3:
-          user = users[0]; // ✅ Store full user info in session (especially _id)
+          user = users[0]; //  Store full user info in session (especially _id)
           req.session.user = {
             _id: user._id,
             // <-- this is the key fix
@@ -296,7 +296,7 @@ app.post("/api/users/login", /*#__PURE__*/function () {
             isAdmin: user.isAdmin || false
           };
 
-          // ✅ Send the same back to frontend
+          //  Send the same back to frontend
           res.json({
             message: "Login successful",
             user: req.session.user
@@ -584,9 +584,35 @@ app.post('/api/users/:username/upload', function (req, res, next) {
 
 // ====== PROJECTS
 // ======== GET all projects
+// app.get("/api/project/", async (req, res) => {
+//   try {
+//     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
+//     res.json(projects);
+//   } catch (err) {
+//     console.error("Fetch projects error:", err);
+//     res.status(500).json({ error: "Failed to fetch projects." });
+//   }
+// });
+
+// // ======== GET single project by id
+// app.get("/api/project/:id", async (req, res) => {
+//   try {
+//     const id = new ObjectId(req.params.id);
+//     const project = await queryDB("projects", "find", { query: { _id: id } });
+//     if (!project.length) return res.status(404).json({ error: "Project not found." });
+//     res.json(project[0]);
+//   } catch (err) {
+//     console.error("Fetch project error:", err);
+//     res.status(500).json({ error: "Failed to fetch project." });
+//   }
+// });
+
+// ====== PROJECTS
+
+// ======== GET all projects
 app.get("/api/project/", /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(req, res) {
-    var projects, _t8;
+    var projects, normalizedProjects, _t8;
     return _regenerator().w(function (_context8) {
       while (1) switch (_context8.p = _context8.n) {
         case 0:
@@ -599,7 +625,24 @@ app.get("/api/project/", /*#__PURE__*/function () {
           });
         case 1:
           projects = _context8.v;
-          res.json(projects);
+          // Normalize data to ensure all expected fields exist
+          normalizedProjects = projects.map(function (p) {
+            return {
+              _id: p._id,
+              name: p.name || "",
+              description: p.description || "",
+              owner: p.owner || "",
+              type: p.type || "unspecified",
+              hashtags: p.hashtags || [],
+              members: p.members || [],
+              version: p.version || 1,
+              status: p.status || "checkedIn",
+              activity: p.activity || [],
+              imageUrl: p.imageUrl || "",
+              createdAt: p.createdAt || new Date()
+            };
+          });
+          res.json(normalizedProjects);
           _context8.n = 3;
           break;
         case 2:
@@ -622,7 +665,7 @@ app.get("/api/project/", /*#__PURE__*/function () {
 // ======== GET single project by id
 app.get("/api/project/:id", /*#__PURE__*/function () {
   var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(req, res) {
-    var id, project, _t9;
+    var id, result, p, normalizedProject, _t9;
     return _regenerator().w(function (_context9) {
       while (1) switch (_context9.p = _context9.n) {
         case 0:
@@ -635,8 +678,8 @@ app.get("/api/project/:id", /*#__PURE__*/function () {
             }
           });
         case 1:
-          project = _context9.v;
-          if (project.length) {
+          result = _context9.v;
+          if (result.length) {
             _context9.n = 2;
             break;
           }
@@ -644,7 +687,22 @@ app.get("/api/project/:id", /*#__PURE__*/function () {
             error: "Project not found."
           }));
         case 2:
-          res.json(project[0]);
+          p = result[0]; // Normalize single project
+          normalizedProject = {
+            _id: p._id,
+            name: p.name || "",
+            description: p.description || "",
+            owner: p.owner || "",
+            type: p.type || "unspecified",
+            hashtags: p.hashtags || [],
+            members: p.members || [],
+            version: p.version || 1,
+            status: p.status || "checkedIn",
+            activity: p.activity || [],
+            imageUrl: p.imageUrl || "",
+            createdAt: p.createdAt || new Date()
+          };
+          res.json(normalizedProject);
           _context9.n = 4;
           break;
         case 3:
@@ -709,31 +767,6 @@ app.get("/api/projects/user/:username", /*#__PURE__*/function () {
   };
 }());
 
-// ======== SAVE a project
-// app.post("/api/projects/save/:id", async (req, res) => {
-//   try {
-//     if (!req.session.user) {
-//       return res.status(401).json({ error: "Not logged in" });
-//     }
-//     const userId = req.session.user._id;
-//     const projectId = req.params.id;
-
-//     const user = await User.findById(userId);
-//     if (!user) return res.status(404).json({ error: "User not found" });
-
-//     if (user.savedProjects.includes(projectId)) {
-//       user.savedProjects.pull(projectId);
-//     } else {
-//       user.savedProjects.push(projectId);
-//     }
-//     await user.save();
-
-//     res.json({ success: true, saved: user.savedProjects });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// })
 // ======== SAVE or UNSAVE a project ======== //
 app.post("/api/projects/save/:id", /*#__PURE__*/function () {
   var _ref1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(req, res) {
@@ -755,7 +788,7 @@ app.post("/api/projects/save/:id", /*#__PURE__*/function () {
         case 2:
           _db2 = _context1.v;
           userId = new ObjectId(req.session.user._id);
-          projectId = new ObjectId(req.params.id); // ✅ correct for real ObjectIds
+          projectId = new ObjectId(req.params.id);
           _context1.n = 3;
           return _db2.collection("users").findOne({
             _id: userId
