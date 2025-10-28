@@ -3,7 +3,6 @@ import React, { createContext, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // ✅ Safe JSON parse helper
   const getStoredUser = () => {
     try {
       const item = localStorage.getItem("user");
@@ -17,7 +16,6 @@ export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(getStoredUser());
 
-  // ✅ Only set / clear user — no backend fetches here
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));

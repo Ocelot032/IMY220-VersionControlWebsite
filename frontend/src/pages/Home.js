@@ -108,15 +108,7 @@ const Home = () => {
           <p>No projects to display.</p>
         ) : (
           filtered.map((proj) => (
-            <ProjectPreview
-              key={proj._id}
-              title={proj.name}
-              description={proj.description}
-              owner={proj.owner || "Unknown"}
-              lastEdited={new Date(proj.createdAt).toLocaleDateString()}
-              image={proj.imageUrl}
-              hashtags={proj.hashtags}
-            />
+            <ProjectPreview key={proj._id} project={proj} />
           ))
         )}
       </main>

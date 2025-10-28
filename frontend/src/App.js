@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Projects from "./pages/Projects";
+import Project from "./pages/Project";
 import CreateProject from "./pages/CreateProject";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -35,14 +35,17 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/projects:projectId"
-          element={
-            <ProtectedRoute>
-              <Projects />
-            </ProtectedRoute>
-          }
-        />
+
+          <Route
+            path="/projects/:projectId"
+            element={
+              <ProtectedRoute>
+                <Project />
+              </ProtectedRoute>
+            }
+          />
+
+
         <Route
           path="/createproject"
           element={
