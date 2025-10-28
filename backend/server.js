@@ -118,17 +118,43 @@ app.locals.upload = upload;
 // ==================== API ROUTES ====================
 // -- keep all your CRUD routes exactly as they are here --
 // Example stubs shown for reference:
+
+// app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
+//   try {
+//     const user = req.body;
+//     user.profileImg = req.file ? req.file.filename : null;
+//     const result = await queryDB("users", "insertOne", { doc: user });
+//     res.json(result);
+//   } catch (err) {
+//     console.error("Register error:", err);
+//     res.status(500).json({ error: "Registration failed" });
+//   }
+// });
+
 app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
   try {
     const user = req.body;
     user.profileImg = req.file ? req.file.filename : null;
+
+    const db = await connectDB();
+
+    // Insert the new user
     const result = await queryDB("users", "insertOne", { doc: user });
-    res.json(result);
+
+    // Fetch the newly created user document
+    const insertedUser = await db.collection("users").findOne({ _id: result.insertedId });
+
+    // Automatically log them in by saving to session
+    req.session.user = insertedUser;
+
+    // Return success + user object to frontend
+    res.json({ message: "Registration successful", user: insertedUser });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ error: "Registration failed" });
   }
 });
+
 
 app.post("/api/users/login", async (req, res) => {
   try {
@@ -310,6 +336,72 @@ app.get("/api/projects/user/:username", async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
+
+
+
+
+// ======== SAVE a project
+// app.post("/api/projects/save/:id", async (req, res) => {
+//   try {
+//     if (!req.session.user) {
+//       return res.status(401).json({ error: "Not logged in" });
+//     }
+//     const userId = req.session.user._id;
+//     const projectId = req.params.id;
+
+//     const user = await User.findById(userId);
+//     if (!user) return res.status(404).json({ error: "User not found" });
+
+//     if (user.savedProjects.includes(projectId)) {
+//       user.savedProjects.pull(projectId);
+//     } else {
+//       user.savedProjects.push(projectId);
+//     }
+//     await user.save();
+
+//     res.json({ success: true, saved: user.savedProjects });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// })
+// ======== SAVE or UNSAVE a project ======== //
+app.post("/api/projects/save/:id", async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user._id) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const db = await connectDB();
+    const userId = new ObjectId(req.session.user._id);
+    const projectId = new ObjectId(req.params.id); // ✅ correct for real ObjectIds
+
+    const user = await db.collection("users").findOne({ _id: userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const alreadySaved = user.savedProjects?.some(
+      (p) => p.toString() === projectId.toString()
+    );
+
+    const update = alreadySaved
+      ? { $pull: { savedProjects: projectId } }
+      : { $addToSet: { savedProjects: projectId } };
+
+    await db.collection("users").updateOne({ _id: userId }, update);
+
+    const updatedUser = await db.collection("users").findOne({ _id: userId });
+    res.json({ success: true, saved: updatedUser.savedProjects || [] });
+  } catch (err) {
+    console.error("Error saving project:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+
+
 
 // ======== GET local projects for a user (friends' projects)
 app.get("/api/project/local/:username", async (req, res) => {
