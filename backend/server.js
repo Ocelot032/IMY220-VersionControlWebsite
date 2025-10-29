@@ -219,19 +219,159 @@ app.get('/api/users/', async (req, res) => {
   }
 });
 
-//======== GET single user by username
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// //======== GET single user by username
+// app.get('/api/users/:username', async (req, res) => {
+//   try {
+//     const username = req.params.username;
+//     const user = await queryDB('users', 'find', { query: { username } });
+
+//     if (!user.length) return res.status(404).json({ error: 'User not found.' });
+//     res.json(user[0]);
+//   } catch (err) {
+//     console.error('Get user error:', err);
+//     res.status(500).json({ error: 'Internal server error.' });
+//   }
+// });
+
+// ======== GET single user by username (context aware)
 app.get('/api/users/:username', async (req, res) => {
   try {
-    const username = req.params.username;
-    const user = await queryDB('users', 'find', { query: { username } });
+    const targetUsername = req.params.username;
+    const viewerUsername = req.headers["x-viewer"]; // who is viewing
 
-    if (!user.length) return res.status(404).json({ error: 'User not found.' });
-    res.json(user[0]);
+    const users = await queryDB('users', 'find', { query: { username: targetUsername } });
+    if (!users.length) return res.status(404).json({ error: 'User not found.' });
+
+    const target = users[0];
+
+    // Default minimal info (non-friend)
+    let visibleProfile = {
+      username: target.username,
+      name: target.name,
+      profileImg: target.profileImg || "",
+    };
+    let visibility = "public";
+
+    // If it's your own profile
+    if (viewerUsername && viewerUsername === target.username) {
+      visibility = "self";
+      visibleProfile = target; // full info (safe since it's you)
+    }
+
+    // If it's a friend
+    else if (viewerUsername && target.friends?.includes(viewerUsername)) {
+      visibility = "friend";
+      visibleProfile = {
+        username: target.username,
+        name: target.name,
+        profileImg: target.profileImg || "",
+        workplace: target.workplace || "",
+        birthday: target.birthday || "",
+        friends: target.friends || [],
+        projects: target.projects || [],
+      };
+    }
+
+    res.json({ visibility, profile: visibleProfile });
   } catch (err) {
     console.error('Get user error:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
+// ======== CONTEXT-AWARE PROFILE VISIBILITY
+app.get('/api/users/view/:username', async (req, res) => {
+  try {
+    const targetUsername = req.params.username;
+    const viewerUsername = req.headers["x-viewer"];
+
+    const users = await queryDB('users', 'find', { query: { username: targetUsername } });
+    if (!users.length) return res.status(404).json({ error: 'User not found.' });
+
+    const target = users[0];
+    let visibility = "public";
+    let visibleProfile = {
+      username: target.username,
+      name: target.name,
+      surname: target.surname || "",
+      profileImg: target.profileImg || "",
+    };
+
+    if (viewerUsername && viewerUsername === target.username) {
+      visibility = "self";
+      visibleProfile = target;
+    } else if (viewerUsername && target.friends?.includes(viewerUsername)) {
+      visibility = "friend";
+      visibleProfile = {
+        username: target.username,
+        name: target.name,
+        surname: target.surname || "",
+        profileImg: target.profileImg || "",
+        workplace: target.workplace || "",
+        birthday: target.birthday || "",
+        email: target.email || "",
+        friends: target.friends || [],
+        projects: target.projects || [],
+      };
+    }
+
+    res.json({ visibility, profile: visibleProfile });
+  } catch (err) {
+    console.error('Get user error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //======== EDIT profile (ecl username & email)
 app.patch('/api/users/:username', async (req, res) => {
@@ -257,6 +397,50 @@ app.patch('/api/users/:username', async (req, res) => {
     res.status(500).json({ error: 'Internal server error during profile update.' });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+// ======== SEARCH users by name or username
+app.get("/api/users/search/:term", async (req, res) => {
+  try {
+    const term = req.params.term;
+    const users = await queryDB("users", "find", {
+      query: {
+        $or: [
+          { username: { $regex: term, $options: "i" } },
+          { name: { $regex: term, $options: "i" } },
+        ],
+      },
+      projection: { password: 0 }, // never send passwords
+    });
+    res.json(users);
+  } catch (err) {
+    console.error("User search error:", err);
+    res.status(500).json({ error: "Could not search users." });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //======== DELETE user
 app.delete('/api/users/:username', async (req, res) => {
