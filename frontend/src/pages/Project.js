@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import FilesList from "../components/FilesList";
 import Messages from "../components/Messages";
 import { AuthContext } from "../context/AuthContext";
+import "../styling/project.css";
 
 const Project = () => {
   const { projectId } = useParams();
@@ -43,39 +44,40 @@ const Project = () => {
       <Header />
 
       <main className="project-page">
-        <h1>{project.name}</h1>
-        <p>{project.description}</p>
-        <img src={`/uploads/projects/${project.imageUrl}`} alt={project.name} width="300" />
+  <div className="project-container">
+    <h1>{project.name}</h1>
+    <p className="project-description">{project.description}</p>
+    <img src={`/uploads/projects/${project.imageUrl}`} alt={project.name} />
 
-        <p>Status: {project.status}</p>
-        <p>Version: {project.version}</p>
-        <div>
-          {project.hashtags?.length > 0 ? (
-  project.hashtags.map((tag) => <span key={tag}>#{tag} </span>)
-) : (
-  <p>No hashtags</p>
-)}
+    <p className="project-meta">
+      Status: {project.status} | Version: {project.version}
+    </p>
 
-        </div>
+    <div className="project-tags">
+      {project.hashtags?.length > 0
+        ? project.hashtags.map((tag) => <span key={tag}>#{tag}</span>)
+        : <p>No hashtags</p>}
+    </div>
 
-        {(isOwner || isMember) && (
-          <section className="actions">
-            {project.status === "checkedIn" ? (
-              <button>Check Out</button>
-            ) : project.checkedOutBy === user.username ? (
-              <button>Check In</button>
-            ) : (
-              <p>Checked out by {project.checkedOutBy}</p>
-            )}
-            {isOwner && <button>Edit Project</button>}
-            {isOwner && <button>Delete Project</button>}
-          </section>
+    {(isOwner || isMember) && (
+      <section className="actions">
+        {project.status === "checkedIn" ? (
+          <button>Check Out</button>
+        ) : project.checkedOutBy === user.username ? (
+          <button>Check In</button>
+        ) : (
+          <p>Checked out by {project.checkedOutBy}</p>
         )}
+        {isOwner && <button>Edit Project</button>}
+        {isOwner && <button>Delete Project</button>}
+      </section>
+    )}
 
-        <FilesList files={project.files || []} />
-        <Messages messages={activity} />
+    <FilesList files={project.files || []} />
+    <Messages messages={activity} />
+  </div>
+</main>
 
-      </main>
 
       <Footer />
     </div>

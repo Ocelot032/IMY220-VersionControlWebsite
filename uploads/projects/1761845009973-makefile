@@ -1,0 +1,20 @@
+cp Mmeotest:*.o
+	g++ -o test *.o
+
+*.o: *.cpp
+	g++ -std=c++98 -c -g *.cpp 
+
+valgrind:
+	valgrind --leak-check=full ./test
+
+run:
+	./test
+
+clean:
+	rm *.o test
+
+debug:
+	gdb test
+
+tar:
+	tar -cvf archive.tar makefile *.cpp *.h

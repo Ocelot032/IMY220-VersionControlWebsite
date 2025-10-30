@@ -1,41 +1,12 @@
-// import React from "react";
 import React, { useEffect } from "react";
 import Login from "./Login";
 import Register from "./Register";
-// import { Link } from 'react-router-dom';
 import { Link, useNavigate } from "react-router-dom";
-
-// const Splash = () => {
-//     return (
-//         <main id="splash">
-//             <section>
-//                 <h1 id="mainHeading">ZYNTHEX</h1>
-//                 <h2 id="subtitle">SYNC. TRACK. GROW.</h2>
-//                 <p id="description">
-//                 Zynthex is a modern version control platform built for seamless collaboration, tracking, and code management.
-//                 Designed with a focus on clarity, control, and community, it enables developers to manage projects, share progress, and stay in sync.
-//                 Whether working solo or in teams, Zynthex keeps your code organized, your versions traceable, and your workflow effortless.
-//                 </p>
-//             </section>
-
-//             <nav>
-//                 <Link to="/login">
-//                 <button type="button">Login</button>
-//                 </Link>
-//                 <Link to="/register">
-//                 <button type="button">Register</button>
-//                 </Link>
-//             </nav>
-//         </main>
-//     );
-// }
-
-// import React, { useEffect } from "react";
-// import { Link, useNavigate } from "react-router-dom";
+import "../global.css";
+import "../styling/splash.css";
 
 const Splash = () => {
     const navigate = useNavigate();
-
     useEffect(() => {
         const checkSession = async () => {
             try {
@@ -56,29 +27,27 @@ const Splash = () => {
     }, [navigate]);
 
     return (
-        <main id="splash">
-            <section>
-                <h1 id="mainHeading">ZYNTHEX</h1>
-                <h2 id="subtitle">SYNC. TRACK. GROW.</h2>
-                <p id="description">
-                    Zynthex is a modern version control platform built for seamless collaboration,
-                    tracking, and code management. Designed with a focus on clarity, control, and
-                    community, it enables developers to manage projects, share progress, and stay in sync.
-                    Whether working solo or in teams, Zynthex keeps your code organized, your versions
-                    traceable, and your workflow effortless.
-                </p>
-            </section>
+    <div className="splash-container">
+      <div className="splash-content">
+        <h1 className="splash-title">ZYNTHEX</h1>
+        <h2 className="splash-subtitle">SYNC. TRACK. GROW.</h2>
 
-            <nav>
-                <Link to="/login">
-                    <button type="button">Login</button>
-                </Link>
-                <Link to="/register">
-                    <button type="button">Register</button>
-                </Link>
-            </nav>
-        </main>
-    );
+        <p className="splash-desc">
+          Zynthex is a modern version control platform built for seamless
+          collaboration, tracking, and code management. <br />
+          Designed with a focus on clarity, control, and community, it enables
+          developers to manage projects, share progress, and stay in sync. <br />
+          Whether you are going solo or working with a team, Zynthex keeps your
+          code organized, your versions traceable, and your workflow flowing.
+        </p>
+
+        <div className="splash-buttons">
+          <Link to="/login" className="splash-btn">Login</Link>
+          <Link to="/register" className="splash-btn secondary">Register</Link>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Splash;

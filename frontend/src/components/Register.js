@@ -1,10 +1,11 @@
+// frontend/src/components/Register.js
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -31,17 +32,7 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {
-      name,
-      surname,
-      username,
-      email,
-      birthday,
-      workplace,
-      password,
-      confirmPassword,
-      profileImg,
-    } = formData;
+    const { name, surname, username, email, birthday, workplace, password, confirmPassword, profileImg } = formData;
 
     if (!name || !surname || !username || !email || !birthday || !workplace || !password || !confirmPassword) {
       setError("All fields are required.");
@@ -64,16 +55,10 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      formData.savedProjects = [];
       const formDataToSend = new FormData();
-      formDataToSend.append("name", name);
-      formDataToSend.append("surname", surname);
-      formDataToSend.append("username", username);
-      formDataToSend.append("email", email);
-      formDataToSend.append("birthday", birthday);
-      formDataToSend.append("workplace", workplace);
-      formDataToSend.append("password", password);
-      if (profileImg) formDataToSend.append("profileImg", profileImg);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) formDataToSend.append(key, value);
+      });
 
       const response = await fetch("http://localhost:8080/api/users/register", {
         method: "POST",
@@ -82,58 +67,61 @@ const RegisterForm = () => {
       });
 
       const data = await response.json();
-      console.log("Register response:", data);
 
       if (response.ok) {
         alert("Registration successful!");
         localStorage.setItem("user", JSON.stringify(data.user));
-
         if (login) login(data.user);
-        navigate("/home"); 
+        navigate("/home");
       } else {
         setError(data.error || "Registration failed. Please try again.");
       }
-    } catch (err) {
-      console.error("Error:", err);
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
-    <form onSubmit={handleSubmit} noValidate encType="multipart/form-data">
-      <div>
-        <label htmlFor="name">Name:</label>
+    <form className="register-form" onSubmit={handleSubmit} noValidate encType="multipart/form-data">
+      <div className="form-group">
+        <label htmlFor="name">Name</label>
         <input id="name" name="name" value={formData.name} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="surname">Surname:</label>
+
+      <div className="form-group">
+        <label htmlFor="surname">Surname</label>
         <input id="surname" name="surname" value={formData.surname} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="username">Username:</label>
+
+      <div className="form-group">
+        <label htmlFor="username">Username</label>
         <input id="username" name="username" value={formData.username} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="email">Email:</label>
+
+      <div className="form-group">
+        <label htmlFor="email">Email</label>
         <input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="birthday">Birthday:</label>
+
+      <div className="form-group">
+        <label htmlFor="birthday">Birthday</label>
         <input id="birthday" type="date" name="birthday" value={formData.birthday} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="workplace">Workplace:</label>
+
+      <div className="form-group">
+        <label htmlFor="workplace">Workplace</label>
         <input id="workplace" name="workplace" value={formData.workplace} onChange={handleChange} required />
       </div>
-      <div>
-        <label htmlFor="profileImg">Profile Image:</label>
+
+      <div className="form-group">
+        <label htmlFor="profileImg">Profile Image</label>
         <input id="profileImg" type="file" name="profileImg" accept="image/*" onChange={handleChange} />
       </div>
-      <div>
-        <label htmlFor="password">Password:</label>
+
+      <div className="form-group">
+        <label htmlFor="password">Password</label>
         <input
           id="password"
           type="password"
@@ -144,8 +132,9 @@ const RegisterForm = () => {
           required
         />
       </div>
-      <div>
-        <label htmlFor="confirmPassword">Confirm Password:</label>
+
+      <div className="form-group">
+        <label htmlFor="confirmPassword">Confirm Password</label>
         <input
           id="confirmPassword"
           type="password"
@@ -157,8 +146,8 @@ const RegisterForm = () => {
         />
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <button type="submit" disabled={loading}>
+      {error && <p className="error-msg">{error}</p>}
+      <button type="submit" className="btn register-btn" disabled={loading}>
         {loading ? "Registering..." : "Register"}
       </button>
     </form>

@@ -2,6 +2,8 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
+import "./global.css";
+
 
 const root = createRoot(document.getElementById("root"));
 root.render(
@@ -11,13 +13,3 @@ root.render(
         </AuthProvider>
     </React.StrictMode>
 );
-
-
-// import React from "react";
-// import { createRoot } from "react-dom/client";
-// import App from "./App";
-
-// const domNode = document.getElementById("root");
-// const root = createRoot(domNode);
-
-// root.render(<App />);

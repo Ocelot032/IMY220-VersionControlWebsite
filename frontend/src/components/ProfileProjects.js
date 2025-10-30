@@ -1,15 +1,17 @@
 import React from "react";
+import "../styling/profile.css";
 
 const ProfileProjects = ({ title = "Projects", projects }) => (
-  <section style={{ marginTop: "1rem" }}>
-    <h3>{title}</h3>
+  <section className="profile-projects">
+    <h3 className="profile-section-title">{title}</h3>
+
     {(!projects || projects.length === 0) ? (
-      <p>No projects found.</p>
+      <p className="no-projects-msg">No projects found.</p>
     ) : (
-      <ul>
+      <ul className="project-list">
         {projects.map((proj, i) => (
-          <li key={i}>
-            <strong>{proj.name || proj}</strong>
+          <li key={i} className="project-list-item">
+            <strong className="project-list-name">{proj.name || proj}</strong>
           </li>
         ))}
       </ul>
