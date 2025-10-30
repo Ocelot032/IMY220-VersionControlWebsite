@@ -14,7 +14,7 @@ var _require = require("mongodb"),
   MongoClient = _require.MongoClient,
   ObjectId = _require.ObjectId;
 
-// ==================== MongoDB setup 
+// ==================== Mongo setup 
 var connectionString = "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 var client = new MongoClient(connectionString);
 var db;
@@ -73,7 +73,7 @@ function _connectDB() {
 }
 function queryDB(_x, _x2) {
   return _queryDB.apply(this, arguments);
-} // ==================== Express app 
+} // ==================== Express
 function _queryDB() {
   _queryDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee34(collectionName, operation) {
     var data,
@@ -136,7 +136,7 @@ var app = express();
 var PORT = 8080;
 var projectRoot = path.resolve(__dirname, "..", "..");
 
-// Middleware
+// ==================== Middleware
 app.use(express.json());
 app.use(express.urlencoded({
   extended: true
@@ -212,10 +212,7 @@ app.post("/api/users/register", upload.single("profileImg"), /*#__PURE__*/functi
           });
         case 3:
           insertedUser = _context.v;
-          // Automatically log them in by saving to session
           req.session.user = insertedUser;
-
-          // Return success + user object to frontend
           res.json({
             message: "Registration successful",
             user: insertedUser
@@ -273,16 +270,13 @@ app.post("/api/users/login", /*#__PURE__*/function () {
             error: "Invalid credentials."
           }));
         case 3:
-          user = users[0]; //  Store full user info in session (especially _id)
+          user = users[0];
           req.session.user = {
             _id: user._id,
-            // <-- this is the key fix
             username: user.username,
             email: user.email,
             isAdmin: user.isAdmin || false
           };
-
-          //  Send the same back to frontend
           res.json({
             message: "Login successful",
             user: req.session.user
@@ -384,7 +378,7 @@ app.post("/api/users/:username/save/:projectId", /*#__PURE__*/function () {
             error: "User not found"
           }));
         case 3:
-          alreadySaved = (_user$savedProjects = user.savedProjects) === null || _user$savedProjects === void 0 ? void 0 : _user$savedProjects.includes(projectId); // Add or remove the project
+          alreadySaved = (_user$savedProjects = user.savedProjects) === null || _user$savedProjects === void 0 ? void 0 : _user$savedProjects.includes(projectId);
           update = alreadySaved ? {
             $pull: {
               savedProjects: projectId
@@ -507,7 +501,7 @@ app.get('/api/users/:username', /*#__PURE__*/function () {
         case 0:
           _context6.p = 0;
           targetUsername = req.params.username;
-          viewerUsername = req.headers["x-viewer"]; // who is viewing
+          viewerUsername = req.headers["x-viewer"];
           _context6.n = 1;
           return queryDB('users', 'find', {
             query: {
@@ -569,44 +563,53 @@ app.get('/api/users/:username', /*#__PURE__*/function () {
   };
 }());
 
-// ======== CONTEXT-AWARE profle visibility
+// ======== CONTEXT-AWARE profile visibility
 app.get('/api/users/view/:username', /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(req, res) {
-    var _target$friends2, targetUsername, viewerUsername, users, target, visibility, visibleProfile, _t7;
+    var _viewer$friends, _target$friends2, targetUsername, viewerUsername, users, target, viewer, visibility, visibleProfile, _t7;
     return _regenerator().w(function (_context7) {
       while (1) switch (_context7.p = _context7.n) {
         case 0:
           _context7.p = 0;
           targetUsername = req.params.username;
-          viewerUsername = req.headers["x-viewer"];
+          viewerUsername = req.headers["x-viewer"]; // fetch both target and viewer in one query
           _context7.n = 1;
-          return queryDB('users', 'find', {
+          return queryDB("users", "find", {
             query: {
-              username: targetUsername
+              username: {
+                $in: [targetUsername, viewerUsername]
+              }
             }
           });
         case 1:
           users = _context7.v;
-          if (users.length) {
+          target = users.find(function (u) {
+            return u.username === targetUsername;
+          });
+          viewer = users.find(function (u) {
+            return u.username === viewerUsername;
+          });
+          if (target) {
             _context7.n = 2;
             break;
           }
           return _context7.a(2, res.status(404).json({
-            error: 'User not found.'
+            error: "User not found."
           }));
         case 2:
-          target = users[0];
           visibility = "public";
           visibleProfile = {
             username: target.username,
             name: target.name,
             surname: target.surname || "",
             profileImg: target.profileImg || ""
-          };
+          }; // viewer is looking at their own profile
           if (viewerUsername && viewerUsername === target.username) {
             visibility = "self";
             visibleProfile = target;
-          } else if (viewerUsername && (_target$friends2 = target.friends) !== null && _target$friends2 !== void 0 && _target$friends2.includes(viewerUsername)) {
+          }
+          // viewer and target are mutual friends
+          else if (viewer && (_viewer$friends = viewer.friends) !== null && _viewer$friends !== void 0 && _viewer$friends.includes(target.username) && (_target$friends2 = target.friends) !== null && _target$friends2 !== void 0 && _target$friends2.includes(viewer.username)) {
             visibility = "friend";
             visibleProfile = {
               username: target.username,
@@ -629,9 +632,9 @@ app.get('/api/users/view/:username', /*#__PURE__*/function () {
         case 3:
           _context7.p = 3;
           _t7 = _context7.v;
-          console.error('Get user error:', _t7);
+          console.error("Get user error:", _t7);
           res.status(500).json({
-            error: 'Internal server error.'
+            error: "Internal server error."
           });
         case 4:
           return _context7.a(2);
@@ -652,7 +655,7 @@ app.patch('/api/users/:username', /*#__PURE__*/function () {
         case 0:
           _context8.p = 0;
           username = req.params.username;
-          updates = req.body; //prevent username/email changes
+          updates = req.body;
           delete updates.username;
           delete updates.email;
           _context8.n = 1;
@@ -722,7 +725,7 @@ app.get("/api/users/search/:term", /*#__PURE__*/function () {
             },
             projection: {
               password: 0
-            } // never send passwords
+            }
           });
         case 1:
           users = _context9.v;
@@ -880,7 +883,6 @@ app.get("/api/project/", /*#__PURE__*/function () {
           });
         case 1:
           projects = _context10.v;
-          // Normalize data to ensure all expected fields exist
           normalizedProjects = projects.map(function (p) {
             return {
               _id: p._id,
@@ -942,7 +944,7 @@ app.get("/api/project/:id", /*#__PURE__*/function () {
             error: "Project not found."
           }));
         case 2:
-          p = result[0]; // Normalize single project
+          p = result[0];
           normalizedProject = {
             _id: p._id,
             name: p.name || "",
@@ -1181,8 +1183,7 @@ app.post("/api/project", upload.any(), /*#__PURE__*/function () {
         case 0:
           _context15.p = 0;
           _req$body2 = req.body, name = _req$body2.name, description = _req$body2.description, owner = _req$body2.owner, members = _req$body2.members, type = _req$body2.type;
-          hashtags = []; // Handle hashtags whether sent as JSON or plain text
-          // Handle hashtags whether sent as JSON or plain text
+          hashtags = [];
           if (req.body.hashtags) {
             try {
               hashtags = JSON.parse(req.body.hashtags);
@@ -1486,7 +1487,6 @@ app.patch("/api/project/:id/checkout", /*#__PURE__*/function () {
             }
           });
         case 4:
-          // log the activity
           activityDoc = {
             projectId: id,
             username: username,
@@ -1617,7 +1617,7 @@ app.patch("/api/project/:id", /*#__PURE__*/function () {
           _context21.p = 0;
           id = new ObjectId(req.params.id);
           updates = req.body;
-          delete updates.owner; // owner cannot change
+          delete updates.owner;
           _context21.n = 1;
           return queryDB("projects", "updateOne", {
             filter: {
@@ -1667,7 +1667,7 @@ app["delete"]("/api/project/:id", /*#__PURE__*/function () {
       while (1) switch (_context22.p = _context22.n) {
         case 0:
           _context22.p = 0;
-          id = new ObjectId(req.params.id); // use 'delete' instead of 'deleteOne'
+          id = new ObjectId(req.params.id);
           _context22.n = 1;
           return queryDB("projects", "delete", {
             query: {
@@ -1716,7 +1716,6 @@ app["delete"]("/api/project/:id", /*#__PURE__*/function () {
 // ==================== FRIENDS ====================
 
 // ======== SEND friend req
-// body: { requester: "username1", receiver: "username2" }
 app.post('/api/friends/request', /*#__PURE__*/function () {
   var _ref23 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee23(req, res) {
     var _req$body4, requester, receiver, users, existing, friendDoc, result, _t23;
@@ -1817,7 +1816,6 @@ app.post('/api/friends/request', /*#__PURE__*/function () {
 }());
 
 // ======== ACCEPT friend req
-// body: { receiver: "username2" }
 app.patch('/api/friends/:id/accept', /*#__PURE__*/function () {
   var _ref24 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee24(req, res) {
     var id, result, request, _request$, requester, receiver, _t24;
@@ -1955,7 +1953,6 @@ app.patch('/api/friends/:id/decline', /*#__PURE__*/function () {
 }());
 
 // ======== UNFRIEND 
-// body: { username1: "A", username2: "B" }
 app["delete"]('/api/friends/unfriend', /*#__PURE__*/function () {
   var _ref26 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee26(req, res) {
     var _req$body5, username1, username2, existing, result, _t26;

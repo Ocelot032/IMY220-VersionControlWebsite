@@ -298,16 +298,23 @@ app.get('/api/users/:username', async (req, res) => {
   }
 });
 
-// ======== CONTEXT-AWARE profle visibility
+// ======== CONTEXT-AWARE profile visibility
 app.get('/api/users/view/:username', async (req, res) => {
   try {
     const targetUsername = req.params.username;
     const viewerUsername = req.headers["x-viewer"];
 
-    const users = await queryDB('users', 'find', { query: { username: targetUsername } });
-    if (!users.length) return res.status(404).json({ error: 'User not found.' });
+    // fetch both target and viewer in one query
+    const users = await queryDB("users", "find", {
+      query: { username: { $in: [targetUsername, viewerUsername] } },
+    });
 
-    const target = users[0];
+    const target = users.find(u => u.username === targetUsername);
+    const viewer = users.find(u => u.username === viewerUsername);
+
+    if (!target)
+      return res.status(404).json({ error: "User not found." });
+
     let visibility = "public";
     let visibleProfile = {
       username: target.username,
@@ -316,10 +323,17 @@ app.get('/api/users/view/:username', async (req, res) => {
       profileImg: target.profileImg || "",
     };
 
+    // viewer is looking at their own profile
     if (viewerUsername && viewerUsername === target.username) {
       visibility = "self";
       visibleProfile = target;
-    } else if (viewerUsername && target.friends?.includes(viewerUsername)) {
+    }
+    // viewer and target are mutual friends
+    else if (
+      viewer &&
+      viewer.friends?.includes(target.username) &&
+      target.friends?.includes(viewer.username)
+    ) {
       visibility = "friend";
       visibleProfile = {
         username: target.username,
@@ -336,10 +350,11 @@ app.get('/api/users/view/:username', async (req, res) => {
 
     res.json({ visibility, profile: visibleProfile });
   } catch (err) {
-    console.error('Get user error:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error("Get user error:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 //======== EDIT profile (excl username & email)
 app.patch('/api/users/:username', async (req, res) => {

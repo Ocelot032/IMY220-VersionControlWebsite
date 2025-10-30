@@ -5,7 +5,6 @@ const ProfileHeader = ({ profile, visibility, onEditClick }) => {
   const [sending, setSending] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  // === Add friend ===
   const handleAddFriend = async () => {
     setSending(true);
     try {
@@ -28,7 +27,6 @@ const ProfileHeader = ({ profile, visibility, onEditClick }) => {
     }
   };
 
-  // === Unfriend ===
   const handleUnfriend = async () => {
     if (!window.confirm(`Are you sure you want to unfriend ${profile.username}?`)) return;
 
