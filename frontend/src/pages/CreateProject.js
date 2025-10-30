@@ -43,14 +43,15 @@ const CreateProject = () => {
     data.append("version", formData.version);
     data.append("owner", user?.username);
     data.append(
-      "hashtags",
-      JSON.stringify(
-        formData.hashtags
-          .split(" ")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      )
-    );
+  "hashtags",
+  JSON.stringify(
+    formData.hashtags
+      .split(" ")
+      .map((t) => t.trim().replace(/^#/, "")) 
+      .filter(Boolean)
+  )
+);
+
 
     if (formData.image) data.append("image", formData.image);
     formData.files.forEach((file) => data.append("files", file));

@@ -1182,6 +1182,7 @@ app.post("/api/project", upload.any(), /*#__PURE__*/function () {
           _context15.p = 0;
           _req$body2 = req.body, name = _req$body2.name, description = _req$body2.description, owner = _req$body2.owner, members = _req$body2.members, type = _req$body2.type;
           hashtags = []; // Handle hashtags whether sent as JSON or plain text
+          // Handle hashtags whether sent as JSON or plain text
           if (req.body.hashtags) {
             try {
               hashtags = JSON.parse(req.body.hashtags);
@@ -1190,6 +1191,11 @@ app.post("/api/project", upload.any(), /*#__PURE__*/function () {
                 return t.trim();
               }).filter(Boolean);
             }
+
+            // Normalize all hashtags by removing any leading #
+            hashtags = hashtags.map(function (t) {
+              return t.replace(/^#/, "").trim();
+            });
           }
           if (!(!name || !owner)) {
             _context15.n = 1;

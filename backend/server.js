@@ -115,7 +115,13 @@ app.use("/uploads", express.static(uploadRoot));
 // ==================== API ROUTES ====================
 
 
+
+
+
 // ==================== USERS ====================
+
+
+
 
 
 //======== Register a single user
@@ -434,7 +440,13 @@ app.post('/api/users/:username/upload', (req, res, next) => {
 });
 
 
+
+
+
 // ==================== PROJECTS ====================
+
+
+
 
 
 // ======== GET all projects
@@ -580,16 +592,21 @@ app.post("/api/project", upload.any(), async (req, res) => {
     let hashtags = [];
 
     // Handle hashtags whether sent as JSON or plain text
-    if (req.body.hashtags) {
-      try {
-        hashtags = JSON.parse(req.body.hashtags);
-      } catch {
-        hashtags = req.body.hashtags
-        .split(" ")
-        .map(t => t.trim())
-        .filter(Boolean); 
-      }
-    }
+    // Handle hashtags whether sent as JSON or plain text
+if (req.body.hashtags) {
+  try {
+    hashtags = JSON.parse(req.body.hashtags);
+  } catch {
+    hashtags = req.body.hashtags
+      .split(" ")
+      .map(t => t.trim())
+      .filter(Boolean);
+  }
+
+  // Normalize all hashtags by removing any leading #
+  hashtags = hashtags.map(t => t.replace(/^#/, "").trim());
+}
+
 
     if (!name || !owner)
       return res.status(400).json({ error: "Name and owner are required." });
@@ -813,7 +830,14 @@ app.delete("/api/project/:id", async (req, res) => {
 });
 
 
+
+
+
 // ==================== FRIENDS ====================
+
+
+
+
 
 // ======== SEND friend req
 // body: { requester: "username1", receiver: "username2" }
@@ -1010,7 +1034,13 @@ app.get('/api/friends/:username/pending', async (req, res) => {
 });
 
 
+
+
+
 // ==================== ACTIVITY ====================
+
+
+
 
 
 // ======== GET all activity (global feed)

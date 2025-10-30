@@ -3,6 +3,8 @@ import "../styling/profile.css";
 
 const ProfileEditForm = ({ user }) => {
   const [formData, setFormData] = useState({
+    name: user.name || "",
+    surname: user.surname || "",
     workplace: user.workplace || "",
     birthday: user.birthday || "",
   });
@@ -19,9 +21,16 @@ const ProfileEditForm = ({ user }) => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      alert(data.message || "Profile updated");
+
+      if (res.ok) {
+        alert("Profile updated successfully!");
+        window.location.reload(); // refresh page to show new info
+      } else {
+        alert(data.error || "Failed to update profile.");
+      }
     } catch (err) {
       console.error("Profile update error:", err);
+      alert("An error occurred while updating your profile.");
     }
   };
 
@@ -30,6 +39,28 @@ const ProfileEditForm = ({ user }) => {
       <h3 className="profile-section-title">Edit Profile</h3>
 
       <form className="edit-profile-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="name">Name:</label>
+          <input
+            id="name"
+            name="name"
+            className="form-input"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="surname">Surname:</label>
+          <input
+            id="surname"
+            name="surname"
+            className="form-input"
+            value={formData.surname}
+            onChange={handleChange}
+          />
+        </div>
+
         <div className="form-group">
           <label htmlFor="workplace">Workplace:</label>
           <input
@@ -53,7 +84,9 @@ const ProfileEditForm = ({ user }) => {
           />
         </div>
 
-        <button type="submit" className="btn save-btn">Save Changes</button>
+        <button type="submit" className="btn save-btn">
+          Save Changes
+        </button>
       </form>
     </section>
   );

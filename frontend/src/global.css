@@ -76,6 +76,7 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  color: rgba(56, 189, 248, 0.15);
 }
 
 /* === ANIMATIONS === */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -14,30 +14,22 @@ import "../styling/profile.css";
 const Profile = () => {
   const { username } = useParams();
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [visibility, setVisibility] = useState("");
   const [loading, setLoading] = useState(true);
   const [savedProjects, setSavedProjects] = useState([]);
-  const [createdProjects, setCreatedProjects] = useState([]); 
+  const [createdProjects, setCreatedProjects] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // If auth context is still loading
-  if (!user) {
-    return <p>Loading profile...</p>;
-  }
-
-  // Fetch profile info
+  // --- fetch profile info ---
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user"));
-        const res = await fetch(
-          `http://localhost:8080/api/users/view/${username}`,
-          {
-            headers: { "X-Viewer": storedUser?.username || "" },
-          }
-        );
+        const res = await fetch(`http://localhost:8080/api/users/view/${username}`, {
+          headers: { "X-Viewer": storedUser?.username || "" },
+        });
         const data = await res.json();
         setProfile(data.profile);
         setVisibility(data.visibility);
@@ -50,30 +42,20 @@ const Profile = () => {
     fetchProfile();
   }, [username]);
 
-  // Fetch saved projects
+  // --- fetch projects ---
   useEffect(() => {
     if (!user?.username) return;
 
     fetch(`http://localhost:8080/api/users/${user.username}/saved`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load saved projects");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => setSavedProjects(data.savedProjects || []))
       .catch((err) => console.error("Error loading saved projects:", err));
-  }, [user]);
-
-  useEffect(() => {
-    if (!username) return;
 
     fetch(`http://localhost:8080/api/projects/user/${username}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load created projects");
-        return res.json();
-      })
-      .then((data) => setCreatedProjects(data.projects || data || []))
+      .then((res) => res.json())
+      .then((data) => setCreatedProjects(data.projects || []))
       .catch((err) => console.error("Error loading created projects:", err));
-  }, [username]);
+  }, [username, user]);
 
   if (loading) return <p>Loading profile...</p>;
   if (!profile) return <p>Profile not found.</p>;
@@ -83,43 +65,52 @@ const Profile = () => {
       <Header />
 
       <main className="profile-page">
-  <section className="profile-header-section">
-    <ProfileHeader profile={profile} visibility={visibility} />
-  </section>
-
-  {visibility !== "public" && (
-    <div className="profile-content">
-      <section className="profile-details-section">
-        <ProfileDetails profile={profile} visibility={visibility} />
-      </section>
-
-      {visibility === "self" && (
-        <section className="friend-requests-section">
-          <ProfileFriendRequests username={user.username} />
+        <section className="profile-header-section">
+          <ProfileHeader
+            profile={profile}
+            visibility={visibility}
+            onEditClick={() => setIsEditing(!isEditing)} 
+          />
         </section>
-      )}
 
-      <section className="profile-projects-section">
-        <ProfileProjects title="Created Projects" projects={createdProjects || []} />
-      </section>
+        {visibility !== "public" && (
+          <div className="profile-content">
+            {!isEditing ? (
+              <>
+                <section className="profile-details-section">
+                  <ProfileDetails profile={profile} visibility={visibility} />
+                </section>
 
-      <section className="profile-projects-section">
-        <ProfileProjects title="Saved Projects" projects={savedProjects || []} />
-      </section>
+                {visibility === "self" && (
+                  <section className="friend-requests-section">
+                    <ProfileFriendRequests username={user.username} />
+                  </section>
+                )}
 
-      <section className="profile-friends-section">
-        <ProfileFriends friends={profile.friends || []} />
-      </section>
-    </div>
-  )}
+                <section className="profile-projects-section">
+                  <ProfileProjects
+                    title="Created Projects"
+                    projects={createdProjects || []}
+                  />
+                </section>
 
-  {visibility === "self" && (
-    <section className="profile-edit-section">
-      <ProfileEditForm user={profile} />
-    </section>
-  )}
-</main>
+                <section className="profile-projects-section">
+                  <ProfileProjects
+                    title="Saved Projects"
+                    projects={savedProjects || []}
+                  />
+                </section>
 
+                <section className="profile-friends-section">
+                  <ProfileFriends friends={profile.friends || []} />
+                </section>
+              </>
+            ) : (
+              <ProfileEditForm user={profile} />
+            )}
+          </div>
+        )}
+      </main>
 
       <Footer />
     </div>
