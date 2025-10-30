@@ -39,7 +39,7 @@ function _connectDB() {
           return client.connect();
         case 2:
           db = client.db("Zynthex");
-          console.log("MongoDB Connected");
+          console.log("Connected to Zynthex Database.");
           _context33.n = 3;
           return db.collection("users").createIndex({
             username: 1
@@ -63,7 +63,7 @@ function _connectDB() {
         case 6:
           _context33.p = 6;
           _t33 = _context33.v;
-          console.error("MongoDB Connection error", _t33);
+          console.error("Database Connection error", _t33);
           throw _t33;
         case 7:
           return _context33.a(2);
@@ -74,7 +74,35 @@ function _connectDB() {
 }
 function queryDB(_x, _x2) {
   return _queryDB.apply(this, arguments);
-} // ==================== Express app setup ====================
+} // async function queryDB(collectionName, operation, data = {}) {
+//   try {
+//     const db = await connectDB();
+//     const collection = db.collection(collectionName);
+//     switch (operation) {
+//       case "find":
+//         return await collection.find(data.query || {}, data.options || {}).toArray();
+//       case "insertOne":
+//         return await collection.insertOne(data.doc);
+//       case "updateOne":
+//         return await collection.updateOne(
+//           data.filter,
+//           data.update,
+//           data.options || {}
+//         );
+//       case "deleteOne":
+//         return await collection.deleteOne(data.filter || data.query || {});
+//       case "delete":
+//         return await collection.deleteMany(data.filter || data.query || {});
+//       case "aggregate":
+//         return await collection.aggregate(data.pipeline || []).toArray();
+//       default:
+//         throw new Error("Invalid operation");
+//     }
+//   } catch (err) {
+//     console.error("queryDB error:", err.message);
+//     return []; 
+// }};
+// ==================== Express app setup ====================
 function _queryDB() {
   _queryDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee34(collectionName, operation) {
     var data,
@@ -2389,6 +2417,9 @@ app.get("/api", function (req, res) {
   return res.json({
     message: "API working successfully"
   });
+});
+app.get("/test", function (req, res) {
+  return res.send("Backend alive");
 });
 
 // ==================== Frontend serving ====================

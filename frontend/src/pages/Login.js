@@ -1,18 +1,19 @@
-import React  from "react";
-import Header from "../components/Header";
-import LoginForm from "../components/Login";
+// frontend/src/pages/Login.js
+import React from "react";
 import Footer from "../components/Footer";
+import LoginForm from "../components/Login";
+import "../global.css";
 
 const Login = () => {
-    return (
-        <div>
-            <div>
-                <h1>Welcome back to Zynthex!</h1>
-                <LoginForm/>
-            </div>
-            <Footer/>
-        </div>
-    );
-}
+  return (
+    <div className="login-container">
+      <div className="login-card fade-in">
+        <h1 className="login-title">Welcome Back!</h1>
+        <LoginForm />
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 export default Login;

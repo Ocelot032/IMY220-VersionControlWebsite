@@ -18,7 +18,7 @@ async function connectDB() {
   try {
     await client.connect();
     db = client.db("Zynthex");
-    console.log("MongoDB Connected");
+    console.log("Connected to Zynthex Database.");
 
     await db.collection("users").createIndex({ username: 1 }, { unique: true });
     await db.collection("users").createIndex({ email: 1 }, { unique: true });
@@ -26,7 +26,7 @@ async function connectDB() {
 
     return db;
   } catch (err) {
-    console.error("MongoDB Connection error", err);
+    console.error("Database Connection error", err);
     throw err;
   }
 }
@@ -65,6 +65,42 @@ async function queryDB(collectionName, operation, data = {}) {
       throw new Error("Invalid operation");
   }
 }
+// async function queryDB(collectionName, operation, data = {}) {
+//   try {
+//     const db = await connectDB();
+//     const collection = db.collection(collectionName);
+
+//     switch (operation) {
+//       case "find":
+//         return await collection.find(data.query || {}, data.options || {}).toArray();
+
+//       case "insertOne":
+//         return await collection.insertOne(data.doc);
+
+//       case "updateOne":
+//         return await collection.updateOne(
+//           data.filter,
+//           data.update,
+//           data.options || {}
+//         );
+
+//       case "deleteOne":
+//         return await collection.deleteOne(data.filter || data.query || {});
+
+//       case "delete":
+//         return await collection.deleteMany(data.filter || data.query || {});
+
+//       case "aggregate":
+//         return await collection.aggregate(data.pipeline || []).toArray();
+
+//       default:
+//         throw new Error("Invalid operation");
+//     }
+//   } catch (err) {
+//     console.error("queryDB error:", err.message);
+//     return []; 
+// }};
+
 
 // ==================== Express app setup ====================
 const app = express();
@@ -1305,6 +1341,7 @@ app.get("/api", (req, res) => res.json({ message: "API working successfully" }))
 
 
 
+app.get("/test", (req, res) => res.send("Backend alive"));
 
 
 // ==================== Frontend serving ====================

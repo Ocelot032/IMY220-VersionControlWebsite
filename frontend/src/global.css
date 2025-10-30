@@ -1,0 +1,548 @@
+/* === GLOBAL THEME === */
+:root {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-accent: #38bdf8;
+  --color-text: #e2e8f0;
+  --color-muted: #94a3b8;
+  --radius: 12px;
+  --transition: 0.25s ease-in-out;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", sans-serif;
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+/* === REUSABLE UTILITIES === */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 25px rgba(56, 189, 248, 0.15);
+}
+
+/* === NAVBAR === */
+header {
+  background-color: var(--color-surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-family: "Poppins", sans-serif;
+  color: var(--color-accent);
+  letter-spacing: 1px;
+}
+
+nav a {
+  color: var(--color-text);
+  margin-left: 1.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+nav a:hover {
+  color: var(--color-accent);
+}
+
+/* === BUTTONS === */
+button,
+.btn {
+  background-color: var(--color-accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+button:hover,
+.btn:hover {
+  background-color: #56c8f8;
+  transform: translateY(-2px);
+}
+
+/* === FORMS === */
+input, textarea, select {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  padding: 0.6rem 0.8rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+/* === LINKS & TAGS === */
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.tag {
+  display: inline-block;
+  background-color: rgba(56, 189, 248, 0.15);
+  color: var(--color-accent);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin: 0.2rem;
+}
+
+/* === FOOTER === */
+footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* === ANIMATIONS === */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+
+
+/* === SPLASH PAGE (refined) === */
+
+.splash-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background: radial-gradient(
+      circle at top left,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom right,
+     rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #0b111f 0%, #0f172a 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.splash-content {
+  max-width: 650px;
+  z-index: 2;
+  animation: fadeIn 1.2s ease-in-out;
+  transform: translateY(-5%); /* true center adjustment */
+}
+
+.splash-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 8rem;
+  letter-spacing: 3px;
+  color: #8eafbd;
+  text-shadow: 0 0 18px rgba(45, 95, 111, 0.3),
+    0 0 20px rgba(45, 95, 111, 0.15);
+  margin-bottom: 0.4rem;
+}
+
+.splash-subtitle {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: #98b0ce;
+  margin-bottom: 2rem;
+}
+
+.splash-desc {
+  line-height: 1.8;
+  color: #ced5dd;
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.splash-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.splash-btn {
+  background: linear-gradient(145deg, #2b3a4f, #1e293b);
+  color: #e2e8f0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.splash-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.splash-btn.secondary {
+  background: linear-gradient(145deg, #1b2535, #0f172a);
+  border: 1px solid #0f172a;
+}
+
+.splash-btn.secondary:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* glowing orbs for depth */
+.splash-container::before,
+.splash-container::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.splash-container::before {
+  width: 700px;
+  height: 700px;
+  top: -150px;
+  left: -300px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.4) 0%,
+    transparent 70%
+  );
+}
+
+.splash-container::after {
+  width: 600px;
+  height: 600px;
+  bottom: -150px;
+  right: -300px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.15) 0%,
+    transparent 70%
+  );
+}
+
+
+
+
+
+
+
+
+/* === LOGIN PAGE (refined for ZYNTHHEX theme) === */
+
+.login-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(
+      circle at top left,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #0b111f 0%, #0f172a 80%);
+  overflow: hidden;
+  color: var(--color-text);
+}
+
+/* --- Glass card --- */
+.login-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+  padding: 3rem 3.5rem;
+  width: 420px;
+  max-width: 90%;
+  text-align: center;
+  animation: fadeIn 1.2s ease-in-out;
+  transform: translateY(-3%);
+}
+
+/* --- Title (smaller but matches splash glow/color) --- */
+.login-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 3rem;
+  letter-spacing: 2px;
+  color: #8eafbd;
+  text-shadow: 0 0 15px rgba(45, 95, 111, 0.3),
+    0 0 20px rgba(45, 95, 111, 0.15);
+  margin-bottom: 2rem;
+}
+
+/* --- Form layout --- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  text-align: left;
+}
+
+.login-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #98b0ce;
+  margin-bottom: 0.2rem;
+}
+
+.login-form input {
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(85, 184, 227, 0.25);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  width: 100%;
+  transition: all 0.25s ease;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: rgba(72, 195, 248, 0.6);
+  box-shadow: 0 0 12px rgba(72, 195, 248, 0.3);
+}
+
+/* --- Error text --- */
+.error-msg {
+  color: #ff7373;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Button --- */
+.login-btn {
+  background: linear-gradient(145deg, #2b3a4f, #1e293b);
+  color: #e2e8f0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  margin-top: 1rem;
+}
+
+.login-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+footer {
+  margin-top: 2rem;
+  text-align: center;
+  color: #98b0ce;
+  font-size: 0.85rem;
+}
+
+
+
+
+
+
+
+/* === REGISTER PAGE (refined, centered, matches splash/login) === */
+.register-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto; /* ✅ allows scrolling */
+  background-attachment: fixed; /* ✅ background stays still */
+  background: radial-gradient(
+      circle at top left,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #0b111f 0%, #0f172a 80%);
+  color: var(--color-text);
+  padding: 4rem 0; /* ✅ some space so scroll feels natural */
+}
+
+.register-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+  padding: 3rem 3.5rem;
+  width: 480px;
+  max-width: 95%;
+  text-align: center;
+  animation: fadeIn 1.2s ease-in-out;
+  margin: auto;
+}
+
+.register-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 2px;
+  color: #8eafbd;
+  text-shadow: 0 0 15px rgba(45, 95, 111, 0.3),
+    0 0 20px rgba(45, 95, 111, 0.15);
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rm;
+}
+
+.register-subtitle {
+  font-size: 1.1rem;
+  color: #98b0ce;
+  margin-bottom: 2rem;
+}
+
+/* --- Form --- */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #98b0ce;
+  margin-bottom: 0.3rem;
+}
+
+.register-form input[type="text"],
+.register-form input[type="email"],
+.register-form input[type="password"],
+.register-form input[type="date"],
+.register-form input[type="file"] {
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(85, 184, 227, 0.25);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  width: 100%;
+  transition: all 0.25s ease;
+}
+
+.register-form input:focus {
+  outline: none;
+  border-color: rgba(72, 195, 248, 0.6);
+  box-shadow: 0 0 12px rgba(72, 195, 248, 0.3);
+}
+
+.error-msg {
+  color: #ff7373;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Button (same as splash/login) --- */
+.register-btn {
+  background: linear-gradient(145deg, #2b3a4f, #1e293b);
+  color: #e2e8f0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  margin-top: 1rem;
+}
+
+.register-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+/* --- Footer alignment --- */
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  color: #98b0ce;
+  font-size: 0.85rem;
+}
+
+
+
+
+
+
