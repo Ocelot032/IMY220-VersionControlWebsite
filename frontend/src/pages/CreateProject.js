@@ -47,10 +47,11 @@ const CreateProject = () => {
       JSON.stringify(
         formData.hashtags
           .split(" ")
-          .map((t) => t.replace("#", "").trim())
+          .map((t) => t.trim())
           .filter(Boolean)
       )
     );
+
     if (formData.image) data.append("image", formData.image);
     formData.files.forEach((file) => data.append("files", file));
 
@@ -75,98 +76,90 @@ const CreateProject = () => {
     <div>
       <Header />
       <main className="create-project">
-        <h1>Create a New Project</h1>
-        <form
-  onSubmit={handleSubmit}
-  encType="multipart/form-data"
-  style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "600px" }}
->
-  <label>
-    Project Name:
-    <input
-      type="text"
-      name="name"
-      value={formData.name}
-      onChange={handleChange}
-      required
-    />
-  </label>
+        <div className="create-project-container">
+          <h1>Create a New Project</h1>
 
-  <label>
-    Description:
-    <textarea
-      name="description"
-      rows="5"
-      style={{ width: "100%", resize: "vertical" }}
-      value={formData.description}
-      onChange={handleChange}
-    />
-  </label>
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="create-project-form">
+            <label>
+              Project Name:
+              <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+            </label>
 
-  <label>
-    Type:
-    <select name="type" value={formData.type} onChange={handleChange}>
-      <option value="unspecified">Unspecified</option>
-      <option value="web">Web App</option>
-      <option value="mobile">Mobile App</option>
-      <option value="desktop">Desktop App</option>
-      <option value="library">Library</option>
-      <option value="framework">Framework</option>
-    </select>
-  </label>
+            <label>
+              Description:
+              <textarea
+                name="description"
+                rows="5"
+                value={formData.description}
+                onChange={handleChange}
+              />
+            </label>
 
-  <label>
-    Version:
-    <input
-      type="text"
-      name="version"
-      placeholder="e.g. 1.0.0"
-      value={formData.version}
-      onChange={handleChange}
-    />
-  </label>
+            <label>
+              Type:
+              <select name="type" value={formData.type} onChange={handleChange}>
+                <option value="unspecified">Unspecified</option>
+                <option value="web">Web App</option>
+                <option value="mobile">Mobile App</option>
+                <option value="desktop">Desktop App</option>
+                <option value="library">Library</option>
+                <option value="framework">Framework</option>
+              </select>
+            </label>
 
-  <label>
-    Hashtags (separate with spaces):
-    <input
-      type="text"
-      name="hashtags"
-      placeholder="#react #javascript #node"
-      value={formData.hashtags}
-      onChange={handleChange}
-    />
-  </label>
+            <label>
+              Version:
+              <input
+                type="text"
+                name="version"
+                placeholder="e.g. 1.0.0"
+                value={formData.version}
+                onChange={handleChange}
+              />
+            </label>
 
-  {/* IMAGE PREVIEW */}
-  <label>
-    Project Image:
-    <input type="file" accept="image/*" onChange={handleImageChange} />
-  </label>
-  {formData.image && (
-    <img
-      src={URL.createObjectURL(formData.image)}
-      alt="Preview"
-      style={{ width: "150px", borderRadius: "8px" }}
-    />
-  )}
+            <label>
+              Hashtags (separate with spaces):
+              <input
+                type="text"
+                name="hashtags"
+                placeholder="#react #javascript #node"
+                value={formData.hashtags}
+                onChange={handleChange}
+              />
+            </label>
 
-  {/* FILES PREVIEW */}
-  <label>
-    Project Files:
-    <input type="file" multiple onChange={handleFileChange} />
-  </label>
-  {formData.files.length > 0 && (
-    <ul style={{ listStyle: "disc", marginLeft: "1.5rem" }}>
-      {formData.files.map((f, i) => (
-        <li key={i}>{f.name}</li>
-      ))}
-    </ul>
-  )}
+            <label>
+              Project Image:
+              <input type="file" accept="image/*" onChange={handleImageChange} />
+            </label>
 
-  <button type="submit">Create Project</button>
-</form>
+            {formData.image && (
+              <img
+                src={URL.createObjectURL(formData.image)}
+                alt="Preview"
+                className="preview-image"
+              />
+            )}
 
+            <label>
+              Project Files:
+              <input type="file" multiple onChange={handleFileChange} />
+            </label>
+
+            {formData.files.length > 0 && (
+              <ul className="file-preview-list">
+                {formData.files.map((f, i) => (
+                  <li key={i}>{f.name}</li>
+                ))}
+              </ul>
+            )}
+
+            <button type="submit" className="submit-btn">Create Project</button>
+          </form>
+        </div>
       </main>
+
       <Footer />
     </div>
   );

@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import Login from "./Login";
 import Register from "./Register";
 import { Link, useNavigate } from "react-router-dom";
-import "../global.css"
+import "../global.css";
+import "../styling/splash.css";
 
 const Splash = () => {
     const navigate = useNavigate();
-
     useEffect(() => {
         const checkSession = async () => {
             try {

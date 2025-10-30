@@ -9,6 +9,7 @@ import ProfileFriends from "../components/ProfileFriends";
 import ProfileEditForm from "../components/ProfileEditForm";
 import ProfileFriendRequests from "../components/ProfileFriendRequests";
 import { AuthContext } from "../context/AuthContext";
+import "../styling/profile.css";
 
 const Profile = () => {
   const { username } = useParams();
@@ -81,36 +82,44 @@ const Profile = () => {
     <div>
       <Header />
 
-      <main style={{ padding: "1rem" }}>
-        <ProfileHeader profile={profile} visibility={visibility} />
+      <main className="profile-page">
+  <section className="profile-header-section">
+    <ProfileHeader profile={profile} visibility={visibility} />
+  </section>
 
-        {visibility !== "public" && (
-          <>
-            <ProfileDetails profile={profile} visibility={visibility} />
+  {visibility !== "public" && (
+    <div className="profile-content">
+      <section className="profile-details-section">
+        <ProfileDetails profile={profile} visibility={visibility} />
+      </section>
 
-            {visibility === "self" && (
-              <ProfileFriendRequests username={user.username} />
-            )}
+      {visibility === "self" && (
+        <section className="friend-requests-section">
+          <ProfileFriendRequests username={user.username} />
+        </section>
+      )}
 
+      <section className="profile-projects-section">
+        <ProfileProjects title="Created Projects" projects={createdProjects || []} />
+      </section>
 
-            {/* Created Projects */}
-            <ProfileProjects
-              title="Created Projects"
-              projects={createdProjects || []}
-            />
+      <section className="profile-projects-section">
+        <ProfileProjects title="Saved Projects" projects={savedProjects || []} />
+      </section>
 
-            {/* Saved Projects */}
-            <ProfileProjects
-              title="Saved Projects"
-              projects={savedProjects || []}
-            />
+      <section className="profile-friends-section">
+        <ProfileFriends friends={profile.friends || []} />
+      </section>
+    </div>
+  )}
 
-            <ProfileFriends friends={profile.friends || []} />
-          </>
-        )}
+  {visibility === "self" && (
+    <section className="profile-edit-section">
+      <ProfileEditForm user={profile} />
+    </section>
+  )}
+</main>
 
-        {visibility === "self" && <ProfileEditForm user={profile} />}
-      </main>
 
       <Footer />
     </div>

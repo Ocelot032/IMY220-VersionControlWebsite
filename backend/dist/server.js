@@ -4,7 +4,6 @@ function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present,
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-// ==================== Core imports ====================
 var express = require("express");
 var path = require("path");
 var session = require("express-session");
@@ -15,13 +14,13 @@ var _require = require("mongodb"),
   MongoClient = _require.MongoClient,
   ObjectId = _require.ObjectId;
 
-// ==================== MongoDB setup ====================
+// ==================== MongoDB setup 
 var connectionString = "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 var client = new MongoClient(connectionString);
 var db;
 function connectDB() {
   return _connectDB.apply(this, arguments);
-} // ==================== Query helper ====================
+} // ==================== Query stuff
 function _connectDB() {
   _connectDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee33() {
     var _t33;
@@ -74,35 +73,7 @@ function _connectDB() {
 }
 function queryDB(_x, _x2) {
   return _queryDB.apply(this, arguments);
-} // async function queryDB(collectionName, operation, data = {}) {
-//   try {
-//     const db = await connectDB();
-//     const collection = db.collection(collectionName);
-//     switch (operation) {
-//       case "find":
-//         return await collection.find(data.query || {}, data.options || {}).toArray();
-//       case "insertOne":
-//         return await collection.insertOne(data.doc);
-//       case "updateOne":
-//         return await collection.updateOne(
-//           data.filter,
-//           data.update,
-//           data.options || {}
-//         );
-//       case "deleteOne":
-//         return await collection.deleteOne(data.filter || data.query || {});
-//       case "delete":
-//         return await collection.deleteMany(data.filter || data.query || {});
-//       case "aggregate":
-//         return await collection.aggregate(data.pipeline || []).toArray();
-//       default:
-//         throw new Error("Invalid operation");
-//     }
-//   } catch (err) {
-//     console.error("queryDB error:", err.message);
-//     return []; 
-// }};
-// ==================== Express app setup ====================
+} // ==================== Express app 
 function _queryDB() {
   _queryDB = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee34(collectionName, operation) {
     var data,
@@ -163,12 +134,7 @@ function _queryDB() {
 }
 var app = express();
 var PORT = 8080;
-
-// Universal project root (works in backend/ and backend/dist/)
 var projectRoot = path.resolve(__dirname, "..", "..");
-// const projectRoot = __dirname.includes("backend")
-//   ? path.resolve(__dirname, "..") // running from /backend
-//   : path.resolve(__dirname);      // running from /dist
 
 // Middleware
 app.use(express.json());
@@ -188,7 +154,7 @@ app.use(session({
   }
 }));
 
-// ==================== File uploads ====================
+// ==================== File uploads
 var uploadRoot = path.join(projectRoot, "uploads");
 if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, {
   recursive: true
@@ -214,23 +180,13 @@ var upload = multer({
   }
 });
 app.locals.upload = upload;
-// ==================== Serve Uploaded Files ====================
 app.use("/uploads", express["static"](uploadRoot));
 
 // ==================== API ROUTES ====================
 
-// app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
-//   try {
-//     const user = req.body;
-//     user.profileImg = req.file ? req.file.filename : null;
-//     const result = await queryDB("users", "insertOne", { doc: user });
-//     res.json(result);
-//   } catch (err) {
-//     console.error("Register error:", err);
-//     res.status(500).json({ error: "Registration failed" });
-//   }
-// });
+// ==================== USERS ====================
 
+//======== Register a single user
 app.post("/api/users/register", upload.single("profileImg"), /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(req, res) {
     var user, _db, result, insertedUser, _t;
@@ -282,6 +238,8 @@ app.post("/api/users/register", upload.single("profileImg"), /*#__PURE__*/functi
     return _ref.apply(this, arguments);
   };
 }());
+
+//======== Login a single user
 app.post("/api/users/login", /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(req, res) {
     var _req$body, username, password, users, user, _t2;
@@ -347,6 +305,8 @@ app.post("/api/users/login", /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }());
+
+//======== Logout a single user
 app.post("/api/users/logout", function (req, res) {
   if (req.session.user) {
     req.session.destroy(function (err) {
@@ -396,7 +356,7 @@ app.get('/api/users/', /*#__PURE__*/function () {
   };
 }());
 
-// === Save or Unsave a project ===
+// === Save / Unsave a project 
 app.post("/api/users/:username/save/:projectId", /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(req, res) {
     var _user$savedProjects, _db2, users, _req$params, username, projectId, user, alreadySaved, update, updatedUser, _t4;
@@ -467,7 +427,7 @@ app.post("/api/users/:username/save/:projectId", /*#__PURE__*/function () {
   };
 }());
 
-// === Get saved projects for a specific user ===
+// === Get saved projects for a specific user 
 app.get("/api/users/:username/saved", /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(req, res) {
     var _db3, users, projects, user, savedIds, _require2, _ObjectId, objectIds, savedProjects, _t5;
@@ -504,7 +464,6 @@ app.get("/api/users/:username/saved", /*#__PURE__*/function () {
             savedProjects: []
           }));
         case 4:
-          // Convert string IDs to ObjectId if necessary
           _require2 = require("mongodb"), _ObjectId = _require2.ObjectId;
           objectIds = savedIds.map(function (id) {
             return typeof id === "string" ? new _ObjectId(id) : id;
@@ -565,20 +524,17 @@ app.get('/api/users/:username', /*#__PURE__*/function () {
             error: 'User not found.'
           }));
         case 2:
-          target = users[0]; // Default minimal info (non-friend)
+          target = users[0];
           visibleProfile = {
             username: target.username,
             name: target.name,
             profileImg: target.profileImg || ""
           };
-          visibility = "public"; // If it's your own profile
+          visibility = "public";
           if (viewerUsername && viewerUsername === target.username) {
             visibility = "self";
-            visibleProfile = target; // full info (safe since it's you)
-          }
-
-          // If it's a friend
-          else if (viewerUsername && (_target$friends = target.friends) !== null && _target$friends !== void 0 && _target$friends.includes(viewerUsername)) {
+            visibleProfile = target;
+          } else if (viewerUsername && (_target$friends = target.friends) !== null && _target$friends !== void 0 && _target$friends.includes(viewerUsername)) {
             visibility = "friend";
             visibleProfile = {
               username: target.username,
@@ -613,7 +569,7 @@ app.get('/api/users/:username', /*#__PURE__*/function () {
   };
 }());
 
-// ======== CONTEXT-AWARE PROFILE VISIBILITY
+// ======== CONTEXT-AWARE profle visibility
 app.get('/api/users/view/:username', /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(req, res) {
     var _target$friends2, targetUsername, viewerUsername, users, target, visibility, visibleProfile, _t7;
@@ -687,7 +643,7 @@ app.get('/api/users/view/:username', /*#__PURE__*/function () {
   };
 }());
 
-//======== EDIT profile (ecl username & email)
+//======== EDIT profile (excl username & email)
 app.patch('/api/users/:username', /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(req, res) {
     var username, updates, result, _t8;
@@ -906,32 +862,7 @@ app.post('/api/users/:username/upload', function (req, res, next) {
   }());
 });
 
-// ====== PROJECTS
-// ======== GET all projects
-// app.get("/api/project/", async (req, res) => {
-//   try {
-//     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
-//     res.json(projects);
-//   } catch (err) {
-//     console.error("Fetch projects error:", err);
-//     res.status(500).json({ error: "Failed to fetch projects." });
-//   }
-// });
-
-// // ======== GET single project by id
-// app.get("/api/project/:id", async (req, res) => {
-//   try {
-//     const id = new ObjectId(req.params.id);
-//     const project = await queryDB("projects", "find", { query: { _id: id } });
-//     if (!project.length) return res.status(404).json({ error: "Project not found." });
-//     res.json(project[0]);
-//   } catch (err) {
-//     console.error("Fetch project error:", err);
-//     res.status(500).json({ error: "Failed to fetch project." });
-//   }
-// });
-
-// ====== PROJECTS
+// ==================== PROJECTS ====================
 
 // ======== GET all projects
 app.get("/api/project/", /*#__PURE__*/function () {
@@ -1242,41 +1173,6 @@ app.get("/api/project/local/:username", /*#__PURE__*/function () {
 }());
 
 // ======== CREATE Project
-// app.post("/api/project/", async (req, res) => {
-//   try {
-//     const { name, description, owner, members, type, hashtags } = req.body;
-
-//     if (!name || !owner)
-//       return res.status(400).json({ error: "Name and owner are required." });
-
-//     const userExists = await queryDB("users", "find", { query: { username: owner } });
-//     if (!userExists.length)
-//       return res.status(400).json({ error: "Owner does not exist." });
-
-//     const projectDoc = {
-//       name,
-//       description: description || "",
-//       owner,
-//       members: members || [],
-//       type: type || "unspecified",
-//       hashtags: hashtags || [],
-//       files: [],
-//       version: 1,
-//       status: "checkedIn", // consistent casing
-//       checkedOutBy: "",
-//       activity: [],
-//       imageUrl: "",
-//       discussion: [],
-//       createdAt: new Date(),
-//     };
-
-//     const result = await queryDB("projects", "insertOne", { doc: projectDoc });
-//     res.status(201).json({ message: "Project created successfully", result });
-//   } catch (err) {
-//     console.error("Create project error:", err);
-//     res.status(500).json({ error: "Internal server error during project creation." });
-//   }
-// });
 app.post("/api/project", upload.any(), /*#__PURE__*/function () {
   var _ref15 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15(req, res) {
     var _req$files, _req$files2, _req$body2, name, description, owner, members, type, hashtags, userExists, projectDoc, result, _t15;
@@ -1291,7 +1187,7 @@ app.post("/api/project", upload.any(), /*#__PURE__*/function () {
               hashtags = JSON.parse(req.body.hashtags);
             } catch (_unused) {
               hashtags = req.body.hashtags.split(" ").map(function (t) {
-                return t.replace("#", "").trim();
+                return t.trim();
               }).filter(Boolean);
             }
           }
@@ -1669,7 +1565,6 @@ app.patch("/api/project/:id/checkin", /*#__PURE__*/function () {
             }
           });
         case 4:
-          // log the activity
           activityDoc = {
             projectId: id,
             username: username,
@@ -1812,7 +1707,7 @@ app["delete"]("/api/project/:id", /*#__PURE__*/function () {
   };
 }());
 
-// ====== FRIENDS
+// ==================== FRIENDS ====================
 
 // ======== SEND friend req
 // body: { requester: "username1", receiver: "username2" }
@@ -2241,7 +2136,7 @@ app.get('/api/friends/:username/pending', /*#__PURE__*/function () {
   };
 }());
 
-// ====== ACTIVITY
+// ==================== ACTIVITY ====================
 
 // ======== GET all activity (global feed)
 app.get("/api/activity", /*#__PURE__*/function () {
@@ -2411,8 +2306,6 @@ app["delete"]("/api/activity/project/:projectId", /*#__PURE__*/function () {
     return _ref32.apply(this, arguments);
   };
 }());
-
-// Quick sanity route
 app.get("/api", function (req, res) {
   return res.json({
     message: "API working successfully"
@@ -2423,10 +2316,7 @@ app.get("/test", function (req, res) {
 });
 
 // ==================== Frontend serving ====================
-// Serve the built or public React files regardless of build mode
 app.use(express["static"](path.join(projectRoot, "frontend", "public")));
-
-// Let React Router handle non-API routes
 app.get(/^\/(?!api).*/, function (req, res) {
   res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });

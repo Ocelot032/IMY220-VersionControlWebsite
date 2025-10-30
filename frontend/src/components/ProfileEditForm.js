@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styling/profile.css";
 
 const ProfileEditForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -25,27 +26,34 @@ const ProfileEditForm = ({ user }) => {
   };
 
   return (
-    <section style={{ marginTop: "1rem" }}>
-      <h3>Edit Profile</h3>
-      <form onSubmit={handleSubmit}>
-        <label>Workplace:
+    <section className="profile-edit">
+      <h3 className="profile-section-title">Edit Profile</h3>
+
+      <form className="edit-profile-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="workplace">Workplace:</label>
           <input
+            id="workplace"
             name="workplace"
+            className="form-input"
             value={formData.workplace}
             onChange={handleChange}
           />
-        </label>
-        <br />
-        <label>Birthday:
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="birthday">Birthday:</label>
           <input
+            id="birthday"
             name="birthday"
             type="date"
+            className="form-input"
             value={formData.birthday}
             onChange={handleChange}
           />
-        </label>
-        <br />
-        <button type="submit">Save Changes</button>
+        </div>
+
+        <button type="submit" className="btn save-btn">Save Changes</button>
       </form>
     </section>
   );

@@ -1,7 +1,6 @@
 import React from "react";
 
 const Friends = ({ friends }) => {
-  // Safety check — if no friends or it's empty
   if (!friends || friends.length === 0) {
     return <p>No friends yet.</p>;
   }

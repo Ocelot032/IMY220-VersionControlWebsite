@@ -1,0 +1,134 @@
+
+/* === REGISTER PAGE (refined, centered, matches splash/login) === */
+.register-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto; /* ✅ allows scrolling */
+  background-attachment: fixed; /* ✅ background stays still */
+  background: radial-gradient(
+      circle at top left,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(72, 195, 248, 0.15),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #0b111f 0%, #0f172a 80%);
+  color: var(--color-text);
+  padding: 4rem 0; /* ✅ some space so scroll feels natural */
+}
+
+.register-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+  padding: 3rem 3.5rem;
+  width: 480px;
+  max-width: 95%;
+  text-align: center;
+  animation: fadeIn 1.2s ease-in-out;
+  margin: auto;
+}
+
+.register-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 2px;
+  color: #8eafbd;
+  text-shadow: 0 0 15px rgba(45, 95, 111, 0.3),
+    0 0 20px rgba(45, 95, 111, 0.15);
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rm;
+}
+
+.register-subtitle {
+  font-size: 1.1rem;
+  color: #98b0ce;
+  margin-bottom: 2rem;
+}
+
+/* --- Form --- */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #98b0ce;
+  margin-bottom: 0.3rem;
+}
+
+.register-form input[type="text"],
+.register-form input[type="email"],
+.register-form input[type="password"],
+.register-form input[type="date"],
+.register-form input[type="file"] {
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(85, 184, 227, 0.25);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  width: 100%;
+  transition: all 0.25s ease;
+}
+
+.register-form input:focus {
+  outline: none;
+  border-color: rgba(72, 195, 248, 0.6);
+  box-shadow: 0 0 12px rgba(72, 195, 248, 0.3);
+}
+
+.error-msg {
+  color: #ff7373;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Button (same as splash/login) --- */
+.register-btn {
+  background: linear-gradient(145deg, #2b3a4f, #1e293b);
+  color: #e2e8f0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  margin-top: 1rem;
+}
+
+.register-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+/* --- Footer alignment --- */
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  color: #98b0ce;
+  font-size: 0.85rem;
+}

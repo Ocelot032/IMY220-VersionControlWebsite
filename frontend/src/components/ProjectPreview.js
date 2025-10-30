@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styling/projectPreview.css";
 
 const ProjectPreview = ({ project }) => {
   const navigate = useNavigate();
-
   const [user, setUser] = useState(null);
   const [savedProjects, setSavedProjects] = useState([]);
 
@@ -18,39 +18,38 @@ const ProjectPreview = ({ project }) => {
   const handleClick = () => navigate(`/projects/${project._id}`);
 
   const handleSave = async (projectId, e) => {
-  e.stopPropagation();
-  if (!user?.username) return alert("Please log in first.");
+    e.stopPropagation();
+    if (!user?.username) return alert("Please log in first.");
 
-  try {
-    const res = await fetch(`http://localhost:8080/api/users/${user.username}/save/${projectId}`, {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/users/${user.username}/save/${projectId}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (res.ok) {
-      const updatedUser = { ...user, savedProjects: data.savedProjects || [] };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      setSavedProjects(data.savedProjects || []);
-    } else {
-      console.error(data.error || "Save failed");
+      if (res.ok) {
+        const updatedUser = { ...user, savedProjects: data.savedProjects || [] };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setSavedProjects(data.savedProjects || []);
+      } else {
+        console.error(data.error || "Save failed");
+      }
+    } catch (err) {
+      console.error("Error saving project:", err);
     }
-  } catch (err) {
-    console.error("Error saving project:", err);
-  }
-};
+  };
 
-
-  // --- handle clickable hashtags ---
   const handleHashtagClick = (tag, e) => {
     e.stopPropagation();
-    // Dispatch a custom event so Home can filter
     window.dispatchEvent(new CustomEvent("searchTag", { detail: tag }));
   };
 
-  // Format creation date safely
   const formattedDate = project.createdAt
     ? new Date(project.createdAt).toLocaleDateString("en-ZA", {
         year: "numeric",
@@ -64,106 +63,65 @@ const ProjectPreview = ({ project }) => {
 
   return (
     <div
-      className="project-card"
-      onClick={handleClick}
-      style={{
-        border: "2px solid #ccc",
-        borderRadius: "10px",
-        padding: "1rem",
-        margin: "1rem 0",
-        cursor: "pointer",
-        transition: "0.2s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#555")}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#ccc")}
-    >
-      {/* Project thumbnail */}
-      <img
-        src={project.imageUrl || "/assets/default-project.png"}
-        alt={project.name}
-        style={{
-          width: "100%",
-          height: "200px",
-          objectFit: "cover",
-          borderRadius: "8px",
-        }}
-      />
-
-      {/* Title + save icon */}
-      <h3 style={{ marginTop: "0.5rem" }}>
+  id={`project-${project._id}`}
+  className="project-card profile-project-card"
+  onClick={handleClick}
+>
+  <div className="project-info">
+    <div className="project-header">
+      <h3 className="project-title">
         {project.name}
         {savedProjects.includes(project._id) && (
-          <span
-            title="You saved this project"
-            style={{ marginLeft: "8px", color: "gold" }}
-          >
-            ★
-          </span>
+          <span className="saved-star" title="You saved this project">★</span>
         )}
       </h3>
+    </div>
 
-      {/* Save / Unsave button */}
-      <button
-        type="button"
-        onClick={(e) => handleSave(project._id, e)}
-        style={{
-          background: savedProjects.includes(project._id) ? "#ffcc00" : "#eee",
-          border: "none",
-          borderRadius: "5px",
-          padding: "0.3rem 0.6rem",
-          cursor: "pointer",
-          marginBottom: "0.5rem",
+    <button
+      type="button"
+      className={`save-btn ${savedProjects.includes(project._id) ? "saved" : ""}`}
+      onClick={(e) => handleSave(project._id, e)}
+    >
+      {savedProjects.includes(project._id) ? "Unsave" : "Save"}
+    </button>
+
+    <p className="project-description">{project.description || "No description provided."}</p>
+
+    <p className="project-meta">
+      By{" "}
+      <span
+        className="project-owner"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/profile/${project.owner}`);
         }}
       >
-        {savedProjects.includes(project._id) ? "Unsave" : "Save"}
-      </button>
+        @{project.owner}
+      </span>{" "}
+      | Type: <span className="project-type">{project.type || "unspecified"}</span> |{" "}
+      <span className="project-date">{formattedDate}</span>
+    </p>
 
-      {/* Description */}
-      <p style={{ margin: "0.5rem 0" }}>
-        {project.description || "No description provided."}
-      </p>
+    <p className="project-stats">
+      {memberCount} member{memberCount !== 1 ? "s" : ""} · {checkinCount} check-in
+      {checkinCount !== 1 ? "s" : ""}
+    </p>
 
-      {/* Owner / Type / Date */}
-      <small style={{ display: "block", marginBottom: "0.25rem" }}>
-        By{" "}
+    <div className="project-tags">
+      {project.hashtags?.map((tag, i) => (
         <span
-          style={{ color: "#0077cc", textDecoration: "underline", cursor: "pointer" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/profile/${project.owner}`);
-          }}
+          key={i}
+          className="hashtag"
+          onClick={(e) => handleHashtagClick(tag, e)}
         >
-          @{project.owner}
-        </span>{" "}
-        | Type: <strong>{project.type || "unspecified"}</strong> | {formattedDate}
-      </small>
-
-      {/* Members & activity counts */}
-      <small style={{ color: "#666" }}>
-        {memberCount} member{memberCount !== 1 ? "s" : ""} · {checkinCount} check-in
-        {checkinCount !== 1 ? "s" : ""}
-      </small>
-
-      {/* Hashtags */}
-      <div style={{ marginTop: "0.5rem" }}>
-        {project.hashtags?.map((tag, i) => (
-          <span
-            key={i}
-            onClick={(e) => handleHashtagClick(tag, e)}
-            style={{
-              marginRight: "0.5rem",
-              color: "#0077cc",
-              cursor: "pointer",
-            }}
-          >
-            #{tag}
-          </span>
-        ))}
-      </div>
+          #{tag}
+        </span>
+      ))}
     </div>
+  </div>
+</div>
+
   );
 };
 
 export default ProjectPreview;
-
-

@@ -1,4 +1,3 @@
-// ==================== Core imports ====================
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
@@ -7,7 +6,7 @@ const multer = require("multer");
 const fs = require("fs");
 const { MongoClient, ObjectId } = require("mongodb");
 
-// ==================== MongoDB setup ====================
+// ==================== MongoDB setup 
 const connectionString =
   "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 const client = new MongoClient(connectionString);
@@ -31,7 +30,7 @@ async function connectDB() {
   }
 }
 
-// ==================== Query helper ====================
+// ==================== Query stuff
 async function queryDB(collectionName, operation, data = {}) {
   const db = await connectDB();
   const collection = db.collection(collectionName);
@@ -65,52 +64,12 @@ async function queryDB(collectionName, operation, data = {}) {
       throw new Error("Invalid operation");
   }
 }
-// async function queryDB(collectionName, operation, data = {}) {
-//   try {
-//     const db = await connectDB();
-//     const collection = db.collection(collectionName);
 
-//     switch (operation) {
-//       case "find":
-//         return await collection.find(data.query || {}, data.options || {}).toArray();
-
-//       case "insertOne":
-//         return await collection.insertOne(data.doc);
-
-//       case "updateOne":
-//         return await collection.updateOne(
-//           data.filter,
-//           data.update,
-//           data.options || {}
-//         );
-
-//       case "deleteOne":
-//         return await collection.deleteOne(data.filter || data.query || {});
-
-//       case "delete":
-//         return await collection.deleteMany(data.filter || data.query || {});
-
-//       case "aggregate":
-//         return await collection.aggregate(data.pipeline || []).toArray();
-
-//       default:
-//         throw new Error("Invalid operation");
-//     }
-//   } catch (err) {
-//     console.error("queryDB error:", err.message);
-//     return []; 
-// }};
-
-
-// ==================== Express app setup ====================
+// ==================== Express app 
 const app = express();
 const PORT = 8080;
 
-// Universal project root (works in backend/ and backend/dist/)
 const projectRoot = path.resolve(__dirname, "..", "..");
-// const projectRoot = __dirname.includes("backend")
-//   ? path.resolve(__dirname, "..") // running from /backend
-//   : path.resolve(__dirname);      // running from /dist
 
 // Middleware
 app.use(express.json());
@@ -132,7 +91,7 @@ app.use(
     })
 );
 
-// ==================== File uploads ====================
+// ==================== File uploads
 const uploadRoot = path.join(projectRoot, "uploads");
 if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, { recursive: true });
 if (!fs.existsSync(path.join(uploadRoot, "projects")))
@@ -149,26 +108,17 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 app.locals.upload = upload;
-// ==================== Serve Uploaded Files ====================
-app.use("/uploads", express.static(uploadRoot));
 
+app.use("/uploads", express.static(uploadRoot));
 
 
 // ==================== API ROUTES ====================
 
 
-// app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
-//   try {
-//     const user = req.body;
-//     user.profileImg = req.file ? req.file.filename : null;
-//     const result = await queryDB("users", "insertOne", { doc: user });
-//     res.json(result);
-//   } catch (err) {
-//     console.error("Register error:", err);
-//     res.status(500).json({ error: "Registration failed" });
-//   }
-// });
+// ==================== USERS ====================
 
+
+//======== Register a single user
 app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
   try {
     const user = req.body;
@@ -193,11 +143,7 @@ app.post("/api/users/register", upload.single("profileImg"), async (req, res) =>
   }
 });
 
-
-
-
-
-
+//======== Login a single user
 app.post("/api/users/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -228,11 +174,7 @@ app.post("/api/users/login", async (req, res) => {
   }
 });
 
-
-
-
-
-
+//======== Logout a single user
 app.post("/api/users/logout", (req, res) => {
   if (req.session.user) {
     req.session.destroy((err) => {
@@ -245,8 +187,6 @@ app.post("/api/users/logout", (req, res) => {
   }
 });
 
-
-
 //======== GET all users
 app.get('/api/users/', async (req, res) => {
   try {
@@ -257,17 +197,7 @@ app.get('/api/users/', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-// === Save or Unsave a project ===
+// === Save / Unsave a project 
 app.post("/api/users/:username/save/:projectId", async (req, res) => {
   try {
     const db = await connectDB();
@@ -295,8 +225,7 @@ app.post("/api/users/:username/save/:projectId", async (req, res) => {
   }
 });
 
-
-// === Get saved projects for a specific user ===
+// === Get saved projects for a specific user 
 app.get("/api/users/:username/saved", async (req, res) => {
   try {
     const db = await connectDB();
@@ -311,7 +240,6 @@ app.get("/api/users/:username/saved", async (req, res) => {
       return res.json({ savedProjects: [] });
     }
 
-    // Convert string IDs to ObjectId if necessary
     const { ObjectId } = require("mongodb");
     const objectIds = savedIds.map((id) =>
       typeof id === "string" ? new ObjectId(id) : id
@@ -328,18 +256,6 @@ app.get("/api/users/:username/saved", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ======== GET single user by username (context aware)
 app.get('/api/users/:username', async (req, res) => {
   try {
@@ -351,7 +267,6 @@ app.get('/api/users/:username', async (req, res) => {
 
     const target = users[0];
 
-    // Default minimal info (non-friend)
     let visibleProfile = {
       username: target.username,
       name: target.name,
@@ -359,13 +274,11 @@ app.get('/api/users/:username', async (req, res) => {
     };
     let visibility = "public";
 
-    // If it's your own profile
     if (viewerUsername && viewerUsername === target.username) {
       visibility = "self";
-      visibleProfile = target; // full info (safe since it's you)
+      visibleProfile = target;
     }
 
-    // If it's a friend
     else if (viewerUsername && target.friends?.includes(viewerUsername)) {
       visibility = "friend";
       visibleProfile = {
@@ -386,7 +299,7 @@ app.get('/api/users/:username', async (req, res) => {
   }
 });
 
-// ======== CONTEXT-AWARE PROFILE VISIBILITY
+// ======== CONTEXT-AWARE profle visibility
 app.get('/api/users/view/:username', async (req, res) => {
   try {
     const targetUsername = req.params.username;
@@ -429,35 +342,7 @@ app.get('/api/users/view/:username', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//======== EDIT profile (ecl username & email)
+//======== EDIT profile (excl username & email)
 app.patch('/api/users/:username', async (req, res) => {
   try {
     const username = req.params.username;
@@ -482,16 +367,6 @@ app.patch('/api/users/:username', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
 // ======== SEARCH users by name or username
 app.get("/api/users/search/:term", async (req, res) => {
   try {
@@ -511,20 +386,6 @@ app.get("/api/users/search/:term", async (req, res) => {
     res.status(500).json({ error: "Could not search users." });
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //======== DELETE user
 app.delete('/api/users/:username', async (req, res) => {
@@ -572,39 +433,9 @@ app.post('/api/users/:username/upload', (req, res, next) => {
   });
 });
 
-// ====== PROJECTS
-// ======== GET all projects
-// app.get("/api/project/", async (req, res) => {
-//   try {
-//     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
-//     res.json(projects);
-//   } catch (err) {
-//     console.error("Fetch projects error:", err);
-//     res.status(500).json({ error: "Failed to fetch projects." });
-//   }
-// });
 
-// // ======== GET single project by id
-// app.get("/api/project/:id", async (req, res) => {
-//   try {
-//     const id = new ObjectId(req.params.id);
-//     const project = await queryDB("projects", "find", { query: { _id: id } });
-//     if (!project.length) return res.status(404).json({ error: "Project not found." });
-//     res.json(project[0]);
-//   } catch (err) {
-//     console.error("Fetch project error:", err);
-//     res.status(500).json({ error: "Failed to fetch project." });
-//   }
-// });
+// ==================== PROJECTS ====================
 
-
-
-
-
-
-
-
-// ====== PROJECTS
 
 // ======== GET all projects
 app.get("/api/project/", async (req, res) => {
@@ -667,14 +498,6 @@ app.get("/api/project/:id", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
 // ======== GET all projects of a specific user (by username)
 app.get("/api/projects/user/:username", async (req, res) => {
   try {
@@ -690,7 +513,6 @@ app.get("/api/projects/user/:username", async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
-
 
 // ======== SAVE or UNSAVE a project ======== //
 app.post("/api/projects/save/:id", async (req, res) => {
@@ -724,11 +546,6 @@ app.post("/api/projects/save/:id", async (req, res) => {
   }
 });
 
-
-
-
-
-
 // ======== GET local projects for a user (friends' projects)
 app.get("/api/project/local/:username", async (req, res) => {
   try {
@@ -756,61 +573,7 @@ app.get("/api/project/local/:username", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ======== CREATE Project
-// app.post("/api/project/", async (req, res) => {
-//   try {
-//     const { name, description, owner, members, type, hashtags } = req.body;
-
-//     if (!name || !owner)
-//       return res.status(400).json({ error: "Name and owner are required." });
-
-//     const userExists = await queryDB("users", "find", { query: { username: owner } });
-//     if (!userExists.length)
-//       return res.status(400).json({ error: "Owner does not exist." });
-
-//     const projectDoc = {
-//       name,
-//       description: description || "",
-//       owner,
-//       members: members || [],
-//       type: type || "unspecified",
-//       hashtags: hashtags || [],
-//       files: [],
-//       version: 1,
-//       status: "checkedIn", // consistent casing
-//       checkedOutBy: "",
-//       activity: [],
-//       imageUrl: "",
-//       discussion: [],
-//       createdAt: new Date(),
-//     };
-
-//     const result = await queryDB("projects", "insertOne", { doc: projectDoc });
-//     res.status(201).json({ message: "Project created successfully", result });
-//   } catch (err) {
-//     console.error("Create project error:", err);
-//     res.status(500).json({ error: "Internal server error during project creation." });
-//   }
-// });
 app.post("/api/project", upload.any(), async (req, res) => {
   try {
     const { name, description, owner, members, type } = req.body;
@@ -821,7 +584,10 @@ app.post("/api/project", upload.any(), async (req, res) => {
       try {
         hashtags = JSON.parse(req.body.hashtags);
       } catch {
-        hashtags = req.body.hashtags.split(" ").map(t => t.replace("#", "").trim()).filter(Boolean);
+        hashtags = req.body.hashtags
+        .split(" ")
+        .map(t => t.trim())
+        .filter(Boolean); 
       }
     }
 
@@ -859,27 +625,6 @@ app.post("/api/project", upload.any(), async (req, res) => {
     res.status(500).json({ error: "Internal server error during project creation." });
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ======== UPLOAD project image
 app.post("/api/project/:id/image", upload.single("projectImage"), async (req, res) => {
@@ -984,7 +729,6 @@ app.patch("/api/project/:id/checkout", async (req, res) => {
   }
 });
 
-
 // ======== CHECK IN project
 app.patch("/api/project/:id/checkin", async (req, res) => {
   try {
@@ -1006,7 +750,6 @@ app.patch("/api/project/:id/checkin", async (req, res) => {
       },
     });
 
-    // log the activity
     const activityDoc = {
       projectId: id,
       username,
@@ -1024,7 +767,6 @@ app.patch("/api/project/:id/checkin", async (req, res) => {
     res.status(500).json({ error: "Failed to check in project." });
   }
 });
-
 
 // ======== UPDATE project details
 app.patch("/api/project/:id", async (req, res) => {
@@ -1071,8 +813,7 @@ app.delete("/api/project/:id", async (req, res) => {
 });
 
 
-
-// ====== FRIENDS
+// ==================== FRIENDS ====================
 
 // ======== SEND friend req
 // body: { requester: "username1", receiver: "username2" }
@@ -1226,7 +967,6 @@ app.delete('/api/friends/unfriend', async (req, res) => {
   }
 });
 
-
 // ======== GET all friends of user
 app.get('/api/friends/:username', async (req, res) => {
   try {
@@ -1269,7 +1009,9 @@ app.get('/api/friends/:username/pending', async (req, res) => {
   }
 });
 
-// ====== ACTIVITY
+
+// ==================== ACTIVITY ====================
+
 
 // ======== GET all activity (global feed)
 app.get("/api/activity", async (req, res) => {
@@ -1334,38 +1076,23 @@ app.delete("/api/activity/project/:projectId", async (req, res) => {
 
 
 
-// Quick sanity route
+
 app.get("/api", (req, res) => res.json({ message: "API working successfully" }));
-
-
-
-
 
 app.get("/test", (req, res) => res.send("Backend alive"));
 
-
 // ==================== Frontend serving ====================
-// Serve the built or public React files regardless of build mode
 app.use(express.static(path.join(projectRoot, "frontend", "public")));
 
-// Let React Router handle non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });
-
-
-
-
-
-
 
 // ==================== Error handling ====================
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Something went wrong on the server." });
 });
-
-
 
 // ==================== Start server ====================
 connectDB()
