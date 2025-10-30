@@ -1,8 +1,8 @@
 import React from "react";
 
-const ProfileProjects = ({ projects }) => (
+const ProfileProjects = ({ title = "Projects", projects }) => (
   <section style={{ marginTop: "1rem" }}>
-    <h3>Projects</h3>
+    <h3>{title}</h3>
     {(!projects || projects.length === 0) ? (
       <p>No projects found.</p>
     ) : (

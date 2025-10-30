@@ -113,11 +113,13 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 app.locals.upload = upload;
+// ==================== Serve Uploaded Files ====================
+app.use("/uploads", express.static(uploadRoot));
+
 
 
 // ==================== API ROUTES ====================
-// -- keep all your CRUD routes exactly as they are here --
-// Example stubs shown for reference:
+
 
 // app.post("/api/users/register", upload.single("profileImg"), async (req, res) => {
 //   try {
@@ -229,6 +231,66 @@ app.get('/api/users/', async (req, res) => {
 
 
 
+// === Save or Unsave a project ===
+app.post("/api/users/:username/save/:projectId", async (req, res) => {
+  try {
+    const db = await connectDB();
+    const users = db.collection("users");
+
+    const { username, projectId } = req.params;
+    const user = await users.findOne({ username });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const alreadySaved = user.savedProjects?.includes(projectId);
+
+    // Add or remove the project
+    const update = alreadySaved
+      ? { $pull: { savedProjects: projectId } }
+      : { $addToSet: { savedProjects: projectId } };
+
+    await users.updateOne({ username }, update);
+
+    const updatedUser = await users.findOne({ username });
+    res.json({ savedProjects: updatedUser.savedProjects || [] });
+  } catch (err) {
+    console.error("Save/Unsave project error:", err);
+    res.status(500).json({ error: "Server error while saving project" });
+  }
+});
+
+
+// === Get saved projects for a specific user ===
+app.get("/api/users/:username/saved", async (req, res) => {
+  try {
+    const db = await connectDB();
+    const users = db.collection("users");
+    const projects = db.collection("projects");
+
+    const user = await users.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const savedIds = user.savedProjects || [];
+    if (savedIds.length === 0) {
+      return res.json({ savedProjects: [] });
+    }
+
+    // Convert string IDs to ObjectId if necessary
+    const { ObjectId } = require("mongodb");
+    const objectIds = savedIds.map((id) =>
+      typeof id === "string" ? new ObjectId(id) : id
+    );
+
+    const savedProjects = await projects
+      .find({ _id: { $in: objectIds } })
+      .toArray();
+
+    res.json({ savedProjects });
+  } catch (err) {
+    console.error("Error fetching saved projects:", err);
+    res.status(500).json({ error: "Server error while fetching saved projects" });
+  }
+});
 
 
 
@@ -241,20 +303,6 @@ app.get('/api/users/', async (req, res) => {
 
 
 
-
-// //======== GET single user by username
-// app.get('/api/users/:username', async (req, res) => {
-//   try {
-//     const username = req.params.username;
-//     const user = await queryDB('users', 'find', { query: { username } });
-
-//     if (!user.length) return res.status(404).json({ error: 'User not found.' });
-//     res.json(user[0]);
-//   } catch (err) {
-//     console.error('Get user error:', err);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// });
 
 // ======== GET single user by username (context aware)
 app.get('/api/users/:username', async (req, res) => {
@@ -672,10 +720,74 @@ app.get("/api/project/local/:username", async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ======== CREATE Project
-app.post("/api/project/", async (req, res) => {
+// app.post("/api/project/", async (req, res) => {
+//   try {
+//     const { name, description, owner, members, type, hashtags } = req.body;
+
+//     if (!name || !owner)
+//       return res.status(400).json({ error: "Name and owner are required." });
+
+//     const userExists = await queryDB("users", "find", { query: { username: owner } });
+//     if (!userExists.length)
+//       return res.status(400).json({ error: "Owner does not exist." });
+
+//     const projectDoc = {
+//       name,
+//       description: description || "",
+//       owner,
+//       members: members || [],
+//       type: type || "unspecified",
+//       hashtags: hashtags || [],
+//       files: [],
+//       version: 1,
+//       status: "checkedIn", // consistent casing
+//       checkedOutBy: "",
+//       activity: [],
+//       imageUrl: "",
+//       discussion: [],
+//       createdAt: new Date(),
+//     };
+
+//     const result = await queryDB("projects", "insertOne", { doc: projectDoc });
+//     res.status(201).json({ message: "Project created successfully", result });
+//   } catch (err) {
+//     console.error("Create project error:", err);
+//     res.status(500).json({ error: "Internal server error during project creation." });
+//   }
+// });
+app.post("/api/project", upload.any(), async (req, res) => {
   try {
-    const { name, description, owner, members, type, hashtags } = req.body;
+    const { name, description, owner, members, type } = req.body;
+    let hashtags = [];
+
+    // Handle hashtags whether sent as JSON or plain text
+    if (req.body.hashtags) {
+      try {
+        hashtags = JSON.parse(req.body.hashtags);
+      } catch {
+        hashtags = req.body.hashtags.split(" ").map(t => t.replace("#", "").trim()).filter(Boolean);
+      }
+    }
 
     if (!name || !owner)
       return res.status(400).json({ error: "Name and owner are required." });
@@ -688,26 +800,50 @@ app.post("/api/project/", async (req, res) => {
       name,
       description: description || "",
       owner,
-      members: members || [],
+      members: members ? JSON.parse(members) : [owner],
       type: type || "unspecified",
-      hashtags: hashtags || [],
-      files: [],
-      version: 1,
-      status: "checkedIn", // consistent casing
+      hashtags,
+      files: req.files?.filter(f => f.fieldname === "files").map(f => f.filename) || [],
+      version: parseFloat(req.body.version) || 1,
+      status: "checkedIn",
       checkedOutBy: "",
       activity: [],
-      imageUrl: "",
+      imageUrl: req.files?.find(f => f.fieldname === "image")?.filename || "",
       discussion: [],
       createdAt: new Date(),
     };
 
     const result = await queryDB("projects", "insertOne", { doc: projectDoc });
-    res.status(201).json({ message: "Project created successfully", result });
+    res.status(201).json({
+      message: "Project created successfully",
+      _id: result.insertedId,
+    });
   } catch (err) {
     console.error("Create project error:", err);
     res.status(500).json({ error: "Internal server error during project creation." });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ======== UPLOAD project image
 app.post("/api/project/:id/image", upload.single("projectImage"), async (req, res) => {
@@ -1168,6 +1304,9 @@ app.get("/api", (req, res) => res.json({ message: "API working successfully" }))
 
 
 
+
+
+
 // ==================== Frontend serving ====================
 // Serve the built or public React files regardless of build mode
 app.use(express.static(path.join(projectRoot, "frontend", "public")));
@@ -1177,10 +1316,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(projectRoot, "frontend", "public", "index.html"));
 });
 
-// app.use(express.static(path.join(projectRoot, "frontend", "dist")));
-// app.get(/^\/(?!api).*/, (req, res) => {
-//   res.sendFile(path.join(projectRoot, "frontend", "dist", "index.html"));
-// });
+
 
 
 

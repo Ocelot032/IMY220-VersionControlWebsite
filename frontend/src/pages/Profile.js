@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -7,21 +7,35 @@ import ProfileDetails from "../components/ProfileDetails";
 import ProfileProjects from "../components/ProfileProjects";
 import ProfileFriends from "../components/ProfileFriends";
 import ProfileEditForm from "../components/ProfileEditForm";
+import { AuthContext } from "../context/AuthContext";
 
 const Profile = () => {
   const { username } = useParams();
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [profile, setProfile] = useState(null);
   const [visibility, setVisibility] = useState("");
   const [loading, setLoading] = useState(true);
+  const [savedProjects, setSavedProjects] = useState([]);
+  const [createdProjects, setCreatedProjects] = useState([]); 
 
+  // If auth context is still loading
+  if (!user) {
+    return <p>Loading profile...</p>;
+  }
+
+  // Fetch profile info
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user"));
-        const res = await fetch(`http://localhost:8080/api/users/view/${username}`, {
-          headers: { "X-Viewer": storedUser?.username || "" },
-        });
+        const res = await fetch(
+          `http://localhost:8080/api/users/view/${username}`,
+          {
+            headers: { "X-Viewer": storedUser?.username || "" },
+          }
+        );
         const data = await res.json();
         setProfile(data.profile);
         setVisibility(data.visibility);
@@ -32,6 +46,31 @@ const Profile = () => {
       }
     };
     fetchProfile();
+  }, [username]);
+
+  // Fetch saved projects
+  useEffect(() => {
+    if (!user?.username) return;
+
+    fetch(`http://localhost:8080/api/users/${user.username}/saved`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load saved projects");
+        return res.json();
+      })
+      .then((data) => setSavedProjects(data.savedProjects || []))
+      .catch((err) => console.error("Error loading saved projects:", err));
+  }, [user]);
+
+  useEffect(() => {
+    if (!username) return;
+
+    fetch(`http://localhost:8080/api/projects/user/${username}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load created projects");
+        return res.json();
+      })
+      .then((data) => setCreatedProjects(data.projects || data || []))
+      .catch((err) => console.error("Error loading created projects:", err));
   }, [username]);
 
   if (loading) return <p>Loading profile...</p>;
@@ -45,15 +84,23 @@ const Profile = () => {
         <ProfileHeader profile={profile} visibility={visibility} />
 
         {visibility !== "public" && (
-          <ProfileDetails profile={profile} visibility={visibility} />
-        )}
+          <>
+            <ProfileDetails profile={profile} visibility={visibility} />
 
-        {visibility !== "public" && (
-          <ProfileProjects projects={profile.projects || []} />
-        )}
+            {/* Created Projects */}
+            <ProfileProjects
+              title="Created Projects"
+              projects={createdProjects || []}
+            />
 
-        {visibility !== "public" && (
-          <ProfileFriends friends={profile.friends || []} />
+            {/* Saved Projects */}
+            <ProfileProjects
+              title="Saved Projects"
+              projects={savedProjects || []}
+            />
+
+            <ProfileFriends friends={profile.friends || []} />
+          </>
         )}
 
         {visibility === "self" && <ProfileEditForm user={profile} />}
@@ -65,485 +112,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState, useContext } from "react";
-// import { useParams } from "react-router-dom";
-// import Header from "../components/Header";
-// import Footer from "../components/Footer";
-// import PersonalInfo from "../components/PersonalInfo";
-// import ProjectPreview from "../components/ProjectPreview";
-// import Friends from "../components/Friends";
-// import { AuthContext } from "../context/AuthContext";
-
-// const Profile = () => {
-//   const params = useParams();
-//   const paramUsername = params.username;
-//   const { user } = useContext(AuthContext);
-//   const username = paramUsername || (user ? user.username : null);
-
-//   const [profileUser, setProfileUser] = useState(null);
-//   const [projects, setProjects] = useState([]);
-//   const [friends, setFriends] = useState([]);
-//   const [pendingRequests, setPendingRequests] = useState([]);
-//   const [isOwnProfile, setIsOwnProfile] = useState(false);
-//   const [isFriend, setIsFriend] = useState(false);
-//   const [friendRequestStatus, setFriendRequestStatus] = useState("none");
-//   const [editing, setEditing] = useState(false);
-
-//   // === Fetch all profile-related data ===
-//   useEffect(() => {
-//     if (!user || !username) return;
-
-//     setIsOwnProfile(username === user.username);
-
-//     const fetchProfileData = async () => {
-//       try {
-//         // ---- Get profile info ----
-//         const res = await fetch(`/api/users/${username}`, { credentials: "include" });
-//         const data = await res.json();
-//         setProfileUser(data);
-
-//         // ---- Get user's projects ----
-//         const projRes = await fetch(`/api/projects/user/${username}`);
-//         if (projRes.ok) {
-//           const projData = await projRes.json();
-//           setProjects(Array.isArray(projData) ? projData : []);
-//         } else {
-//           setProjects([]); // fallback if none
-//         }
-
-//         // ---- Get friends ----
-//         const friendsRes = await fetch(`/api/friends/${username}`);
-//         const friendsData = await friendsRes.json();
-//         console.log("Friends API response:", friendsData);
-//         const friendsArray = Array.isArray(friendsData)
-//           ? friendsData
-//           : friendsData.friends || [];
-//         setFriends(friendsArray);
-
-//         // ---- Get pending requests (only if own profile) ----
-//         if (username === user.username) {
-//           const pendingRes = await fetch(`/api/friends/${username}/pending`);
-//           const pendingData = await pendingRes.json();
-//           setPendingRequests(Array.isArray(pendingData) ? pendingData : pendingData.pending || []);
-//         }
-
-//         // ---- Check if already friends ----
-//         if (friendsArray.some((f) => f.username === user.username)) {
-//           setIsFriend(true);
-//         }
-//       } catch (err) {
-//         console.error("Error fetching profile:", err);
-//       }
-//     };
-
-//     fetchProfileData();
-
-//   }, [username, user]);
-
-//   // === Save edited profile ===
-//   const handleEditSave = async (updatedData) => {
-//   try {
-//     const res = await fetch(`/api/users/${user.username}`, {
-//       method: "PATCH",
-//       headers: { "Content-Type": "application/json" },
-//       credentials: "include",
-//       body: JSON.stringify(updatedData),
-//     });
-
-//     if (!res.ok) {
-//       console.error("Failed to update profile:", res.statusText);
-//       return;
-//     }
-
-//     // success prompt
-//     alert("Profile updated successfully!");
-
-//     // re-fetch the updated profile from the backend immediately
-//     const refreshRes = await fetch(`/api/users/${user.username}`, { credentials: "include" });
-//     const refreshedUser = await refreshRes.json();
-
-//     setProfileUser(refreshedUser);
-//     setEditing(false);
-//   } catch (err) {
-//     console.error("Error updating profile:", err);
-//   }
-// };
-
-
-
-//   // === Send friend request ===
-//   const handleAddFriend = async () => {
-//     setFriendRequestStatus("sent");
-//     try {
-//       const res = await fetch(`/api/friends/request`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         credentials: "include",
-//         body: JSON.stringify({
-//           requester: user.username,
-//           receiver: username,
-//         }),
-//       });
-//       if (!res.ok) throw new Error("Failed to send friend request");
-//       setFriendRequestStatus("pending");
-//     } catch (err) {
-//       console.error(err);
-//       setFriendRequestStatus("none");
-//     }
-//   };
-
-//   // === Accept friend request ===
-//   const handleAccept = async (id) => {
-//     try {
-//       const res = await fetch(`/api/friends/${id}/accept`, {
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/json" },
-//         credentials: "include",
-//         body: JSON.stringify({ receiver: user.username }),
-//       });
-//       if (res.ok) {
-//         setPendingRequests((prev) => prev.filter((req) => req._id !== id));
-//       }
-//     } catch (err) {
-//       console.error("Error accepting friend:", err);
-//     }
-//   };
-
-//   if (!user) {
-//     return <p>You must be logged in to view this page.</p>;
-//   }
-
-//   if (!profileUser) {
-//     return <p>Loading profile...</p>;
-//   }
-
-//   return (
-//     <div>
-//       <Header/>
-
-
-//       <h1>{isOwnProfile ? "My Profile" : `${profileUser.username}'s Profile`}</h1>
-
-//       <PersonalInfo
-//         user={profileUser}
-//         isOwnProfile={isOwnProfile}
-//         editing={editing}
-//         onSave={handleEditSave}
-//         onEditToggle={() => setEditing(!editing)}
-//       />
-
-//       {!isOwnProfile && (
-//         <div>
-//           <p>{isFriend ? "You are friends" : "Not friends"}</p>
-//           {!isFriend && (
-//             <button
-//               onClick={handleAddFriend}
-//               disabled={friendRequestStatus === "pending"}
-//             >
-//               {friendRequestStatus === "pending"
-//                 ? "Friend Request Sent"
-//                 : "Add Friend"}
-//             </button>
-//           )}
-//         </div>
-//       )}
-
-//       {isOwnProfile && (
-//         <div>
-//           <h2>Friends</h2>
-//           {friends.length > 0 ? (
-//             <Friends friends={friends} />
-//           ) : (
-//             <p>You have no friends yet.</p>
-//           )}
-
-//           {pendingRequests.length > 0 && (
-//             <div>
-//               <h3>Pending Requests</h3>
-//               {pendingRequests.map((r) => (
-//                 <div key={r._id}>
-//                   <p>{r.requester}</p>
-//                   <button onClick={() => handleAccept(r._id)}>Accept</button>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       )}
-
-//       <div>
-//         <h2>Projects</h2>
-//         {projects.length > 0 ? (
-//   projects.map((p) => (
-//     <ProjectPreview
-//       key={p._id}
-//       title={p.name}
-//       description={p.description}
-//       owner={p.owner || "Unknown"}
-//       lastEdited={new Date(p.createdAt).toLocaleDateString()}
-//       image={p.imageUrl}
-//       hashtags={p.hashtags}
-//     />
-//   ))
-// ) : (
-//   <p>No projects yet.</p>
-// )}
-
-//       </div>
-
-//       <Footer />
-//     </div>
-//   );
-// };
-
-// export default Profile;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState, useContext } from "react";
-// import { useParams } from "react-router-dom";
-// import Header from "../components/Header";
-// import Footer from "../components/Footer";
-// import PersonalInfo from "../components/PersonalInfo";
-// import ProjectPreview from "../components/ProjectPreview";
-// import Friends from "../components/Friends";
-// import { AuthContext } from "../context/AuthContext";
-
-// const Profile = () => {
-//   const params = useParams();
-//   const paramUsername = params.username; 
-//   const { user } = useContext(AuthContext);
-//   const username = paramUsername || (user ? user.username : null);
-//   const [profileUser, setProfileUser] = useState(null);
-//   const [projects, setProjects] = useState([]);
-//   const [friends, setFriends] = useState([]);
-//   const [pendingRequests, setPendingRequests] = useState([]);
-//   const [isOwnProfile, setIsOwnProfile] = useState(false);
-//   const [isFriend, setIsFriend] = useState(false);
-//   const [friendRequestStatus, setFriendRequestStatus] = useState("none");
-//   const [editing, setEditing] = useState(false);
-
-//   // === Fetch all profile-related data ===
-//   useEffect(() => {
-//   // if (!user) return; 
-//    if (!user || !username) return; //new
-
-//   setIsOwnProfile(username === user.username);
-
-//   const fetchProfileData = async () => {
-//     try {
-//       // Get profile info
-//       const res = await fetch(`/api/users/${username}`, { credentials: "include" }); //valid api route
-//       const data = await res.json();
-//       setProfileUser(data);
-
-//       // Get friends
-//       const friendsRes = await fetch(`/api/friends/${username}`); //valid api route
-//       const friendsData = await friendsRes.json();
-
-//       // Normalise friends array safely
-//       const friendsArray = Array.isArray(friendsData)
-//         ? friendsData
-//         : friendsData.friends || [];
-
-//       setFriends(friendsArray);
-
-//       // Get pending requests (only if own profile)
-//       if (username === user.username) {
-//         const pendingRes = await fetch(`/api/friends/${username}/pending`); //valid api route
-//         const pendingData = await pendingRes.json();
-//         setPendingRequests(Array.isArray(pendingData) ? pendingData : pendingData.pending || []);
-//       }
-
-//       // Check if current user is already friends
-//       if (friendsArray.some((f) => f.username === user.username)) {
-//         setIsFriend(true);
-//       }
-//     } catch (err) {
-//       console.error("Error fetching profile:", err);
-//     }
-//   };
-
-//   fetchProfileData();
-// }, [username, user]);
-
-
-//   // === Save edited profile ===
-//   const handleEditSave = async (updatedData) => {
-//     try {
-//       const res = await fetch(`/api/users/${user.username}`, { //valid api route
-//         method: "PUT",
-//         headers: { "Content-Type": "application/json" },
-//         credentials: "include",
-//         body: JSON.stringify(updatedData),
-//       });
-//       if (res.ok) {
-//         const updatedUser = await res.json();
-//         setProfileUser(updatedUser);
-//         setEditing(false);
-//       }
-//     } catch (err) {
-//       console.error("Error updating profile:", err);
-//     }
-//   };
-
-//   // === Send friend request ===
-//   const handleAddFriend = async () => {
-//     setFriendRequestStatus("sent");
-//     try {
-//       const res = await fetch(`/api/friends/request`, { //valid api route
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         credentials: "include",
-//         body: JSON.stringify({
-//           requester: user.username,
-//           receiver: username,
-//         }),
-//       });
-//       if (!res.ok) throw new Error("Failed to send friend request");
-//       setFriendRequestStatus("pending");
-//     } catch (err) {
-//       console.error(err);
-//       setFriendRequestStatus("none");
-//     }
-//   };
-
-//   // === Accept friend request ===
-//   const handleAccept = async (id) => {
-//     try {
-//       const res = await fetch(`/api/friends/${id}/accept`, { //valid api route
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/json" },
-//         credentials: "include",
-//         body: JSON.stringify({ receiver: user.username }),
-//       });
-//       if (res.ok) {
-//         setPendingRequests((prev) => prev.filter((req) => req._id !== id));
-//       }
-//     } catch (err) {
-//       console.error("Error accepting friend:", err);
-//     }
-//   };
-
-//   if (!user) {
-//     return <p>You must be logged in to view this page.</p>;
-//   }
-
-//   if (!profileUser) {
-//     return <p>Loading profile...</p>;
-//   }
-
-//   return (
-//     <div>
-//       <Header />
-
-//       <h1>{isOwnProfile ? "My Profile" : profileUser.username + "'s Profile"}</h1>
-
-//       <PersonalInfo
-//         user={profileUser}
-//         isOwnProfile={isOwnProfile}
-//         editing={editing}
-//         onSave={handleEditSave}
-//         onEditToggle={() => setEditing(!editing)}
-//       />
-
-//       {/* Friend controls (only visible on other users' profiles) */}
-//       {!isOwnProfile && (
-//         <div>
-//           <p>{isFriend ? "You are friends" : "Not friends"}</p>
-//           {!isFriend && (
-//             <button
-//               onClick={handleAddFriend}
-//               disabled={friendRequestStatus === "pending"}
-//             >
-//               {friendRequestStatus === "pending"
-//                 ? "Friend Request Sent"
-//                 : "Add Friend"}
-//             </button>
-//           )}
-//         </div>
-//       )}
-
-//       {/* Friends + Pending (only for own profile) */}
-//       {isOwnProfile && (
-//         <div>
-//           <h2>Friends</h2>
-//           <Friends friends={friends} />
-
-//           {pendingRequests.length > 0 && (
-//             <div>
-//               <h3>Pending Requests</h3>
-//               {pendingRequests.map((r) => (
-//                 <div key={r._id}>
-//                   <p>{r.requester}</p>
-//                   <button onClick={() => handleAccept(r._id)}>Accept</button>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       )}
-
-//       {/* Projects (optional placeholder for now) */}
-//       <div>
-//         <h2>Projects</h2>
-//         {projects.length > 0 ? (
-//           projects.map((p) => (
-//             <ProjectPreview
-//               key={p._id}
-//               title={p.title}
-//               description={p.description}
-//               author={p.owner}
-//               lastEdited={p.updatedAt}
-//             />
-//           ))
-//         ) : (
-//           <p>No projects yet.</p>
-//         )}
-//       </div>
-
-//       <Footer />
-//     </div>
-//   );
-// };
-
-// export default Profile;
-
