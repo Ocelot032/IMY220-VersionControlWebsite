@@ -7,6 +7,7 @@ import ProfileDetails from "../components/ProfileDetails";
 import ProfileProjects from "../components/ProfileProjects";
 import ProfileFriends from "../components/ProfileFriends";
 import ProfileEditForm from "../components/ProfileEditForm";
+import ProfileFriendRequests from "../components/ProfileFriendRequests";
 import { AuthContext } from "../context/AuthContext";
 
 const Profile = () => {
@@ -86,6 +87,11 @@ const Profile = () => {
         {visibility !== "public" && (
           <>
             <ProfileDetails profile={profile} visibility={visibility} />
+
+            {visibility === "self" && (
+              <ProfileFriendRequests username={user.username} />
+            )}
+
 
             {/* Created Projects */}
             <ProfileProjects
