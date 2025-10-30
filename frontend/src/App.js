@@ -13,12 +13,10 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected (logged-in only) routes */}
         <Route
           path="/home"
           element={

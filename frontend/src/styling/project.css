@@ -1,4 +1,3 @@
-/* === PROJECT PAGE === */
 .project-page {
   display: flex;
   flex-direction: column;
@@ -7,7 +6,6 @@
   color: var(--color-text);
 }
 
-/* --- MAIN CONTAINER --- */
 .project-container {
   background: rgba(45, 60, 90, 0.75);
   border: 1px solid rgba(85, 184, 227, 0.25);
@@ -20,7 +18,6 @@
   margin-top: 2rem;
 }
 
-/* --- HEADER INFO --- */
 .project-container h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -39,7 +36,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* --- IMAGE --- */
 .project-container img {
   display: block;
   max-width: 300px;
@@ -49,7 +45,6 @@
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* --- META INFO --- */
 .project-meta {
   text-align: center;
   color: #9cb5c7;
@@ -62,7 +57,6 @@
   cursor: pointer;
 }
 
-/* --- TAGS --- */
 .project-tags {
   display: flex;
   flex-wrap: wrap;
@@ -86,7 +80,6 @@
   text-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
 }
 
-/* --- ACTION BUTTONS --- */
 .actions {
   display: flex;
   justify-content: center;
@@ -113,14 +106,8 @@
   transform: translateY(-2px);
 }
 
-/* --- SECTION CONTAINERS (Files & Activity) --- */
 section {
-  /* background: rgba(30, 41, 59, 0.55); */
-  /* border: 1px solid rgba(85, 184, 227, 0.15); */
-  /* border-radius: 12px; */
-  /* padding: 1.5rem 2rem; */
   margin-bottom: 1.8rem;
-  /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25); */
 }
 
 section h2 {
@@ -146,22 +133,16 @@ section li a {
   text-decoration: none;
 }
 
-/* section li a:hover {
-  text-decoration: underline;
-} */
-
 section p {
   color: #a9bccc;
 }
 
-/* --- EMPTY TEXT --- */
 section p:empty::before {
   content: "No data available.";
   color: #94a3b8;
   font-style: italic;
 }
 
-/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .project-container {
     padding: 1.5rem;
@@ -171,7 +152,6 @@ section p:empty::before {
   }
 }
 
-/* === CREATE PROJECT PAGE === */
 .create-project {
   display: flex;
   justify-content: center;
@@ -199,7 +179,6 @@ section p:empty::before {
   margin-bottom: 1.5rem;
 }
 
-/* --- FORM STYLING --- */
 .create-project-form {
   display: flex;
   flex-direction: column;
@@ -236,7 +215,6 @@ section p:empty::before {
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
 }
 
-/* --- Image Preview --- */
 .preview-image {
   width: 150px;
   border-radius: 10px;
@@ -244,14 +222,12 @@ section p:empty::before {
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* --- File List --- */
 .file-preview-list {
   margin-left: 1.5rem;
   list-style: disc;
   color: #cdd8e0;
 }
 
-/* --- Submit Button --- */
 .submit-btn {
   align-self: center;
   background: linear-gradient(145deg, #2b3a4f, #1e293b);
@@ -273,7 +249,6 @@ section p:empty::before {
   transform: translateY(-2px);
 }
 
-/* --- Responsive --- */
 @media (max-width: 768px) {
   .create-project-container {
     padding: 1.8rem 1.2rem;

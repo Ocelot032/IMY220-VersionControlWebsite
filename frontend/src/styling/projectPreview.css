@@ -1,6 +1,5 @@
-/* === PROJECT PREVIEW CARD === */
 .project-card {
-  background: rgba(45, 60, 90, 0.75); /* slightly lighter glass effect */
+  background: rgba(45, 60, 90, 0.75); 
   border: 1px solid rgba(85, 184, 227, 0.25);
   border-radius: 16px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
@@ -10,7 +9,6 @@
   transition: all 0.3s ease-in-out;
   backdrop-filter: blur(8px);
 
-  /* Centered card with limited width */
   width: 90%;
   max-width: 700px;
   margin: 1.5rem auto;
@@ -22,7 +20,6 @@
   box-shadow: 0 8px 25px rgba(56, 189, 248, 0.15);
 }
 
-/* --- Image --- */
 .project-thumbnail {
   width: 100%;
   height: 220px;
@@ -30,12 +27,10 @@
   border-radius: 16px 16px 0 0;
 }
 
-/* --- Info Section --- */
 .project-info {
   padding: 1.3rem 1.5rem;
 }
 
-/* Header row (title + optional star) */
 .project-header {
   display: flex;
   align-items: center;
@@ -50,7 +45,6 @@
   letter-spacing: 0.5px;
 }
 
-/* --- Saved Star --- */
 .saved-star {
   color: gold;
   font-size: 1.3rem;
@@ -58,7 +52,6 @@
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
 }
 
-/* --- Save Button --- */
 .save-btn {
   margin-top: 0.8rem;
   background: linear-gradient(145deg, #2b3a4f, #1e293b);
@@ -83,14 +76,12 @@
   color: #fff;
 }
 
-/* --- Description --- */
 .project-description {
   margin-top: 1rem;
   line-height: 1.6;
   color: #d8e4ed;
 }
 
-/* --- Meta Info --- */
 .project-meta {
   font-size: 0.9rem;
   color: #9cb5c7;
@@ -114,14 +105,12 @@
   color: #88a8ba;
 }
 
-/* --- Stats --- */
 .project-stats {
   font-size: 0.85rem;
   color: var(--color-muted);
   margin-top: 0.3rem;
 }
 
-/* --- Tags --- */
 .project-tags {
   margin-top: 0.8rem;
   display: flex;
@@ -144,7 +133,6 @@
   text-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
 }
 
-/* --- Responsive --- */
 @media (max-width: 768px) {
   .project-card {
     width: 95%;

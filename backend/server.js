@@ -6,7 +6,7 @@ const multer = require("multer");
 const fs = require("fs");
 const { MongoClient, ObjectId } = require("mongodb");
 
-// ==================== MongoDB setup 
+// ==================== Mongo setup 
 const connectionString =
   "mongodb+srv://marker:mark123@imy220.0gytrcp.mongodb.net/?retryWrites=true&w=majority&appName=IMY220";
 const client = new MongoClient(connectionString);
@@ -65,13 +65,13 @@ async function queryDB(collectionName, operation, data = {}) {
   }
 }
 
-// ==================== Express app 
+// ==================== Express
 const app = express();
 const PORT = 8080;
 
 const projectRoot = path.resolve(__dirname, "..", "..");
 
-// Middleware
+// ==================== Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -132,16 +132,12 @@ app.post("/api/users/register", upload.single("profileImg"), async (req, res) =>
 
     const db = await connectDB();
 
-    // Insert the new user
     const result = await queryDB("users", "insertOne", { doc: user });
 
-    // Fetch the newly created user document
     const insertedUser = await db.collection("users").findOne({ _id: result.insertedId });
 
-    // Automatically log them in by saving to session
     req.session.user = insertedUser;
 
-    // Return success + user object to frontend
     res.json({ message: "Registration successful", user: insertedUser });
   } catch (err) {
     console.error("Register error:", err);
@@ -164,15 +160,13 @@ app.post("/api/users/login", async (req, res) => {
 
     const user = users[0];
 
-    //  Store full user info in session (especially _id)
     req.session.user = {
-      _id: user._id, // <-- this is the key fix
+      _id: user._id, 
       username: user.username,
       email: user.email,
       isAdmin: user.isAdmin || false,
     };
 
-    //  Send the same back to frontend
     res.json({ message: "Login successful", user: req.session.user });
   } catch (err) {
     console.error("Login error:", err);
@@ -216,7 +210,6 @@ app.post("/api/users/:username/save/:projectId", async (req, res) => {
 
     const alreadySaved = user.savedProjects?.includes(projectId);
 
-    // Add or remove the project
     const update = alreadySaved
       ? { $pull: { savedProjects: projectId } }
       : { $addToSet: { savedProjects: projectId } };
@@ -266,7 +259,7 @@ app.get("/api/users/:username/saved", async (req, res) => {
 app.get('/api/users/:username', async (req, res) => {
   try {
     const targetUsername = req.params.username;
-    const viewerUsername = req.headers["x-viewer"]; // who is viewing
+    const viewerUsername = req.headers["x-viewer"]; 
 
     const users = await queryDB('users', 'find', { query: { username: targetUsername } });
     if (!users.length) return res.status(404).json({ error: 'User not found.' });
@@ -354,7 +347,6 @@ app.patch('/api/users/:username', async (req, res) => {
     const username = req.params.username;
     const updates = req.body;
 
-    //prevent username/email changes
     delete updates.username;
     delete updates.email;
 
@@ -384,7 +376,7 @@ app.get("/api/users/search/:term", async (req, res) => {
           { name: { $regex: term, $options: "i" } },
         ],
       },
-      projection: { password: 0 }, // never send passwords
+      projection: { password: 0 },
     });
     res.json(users);
   } catch (err) {
@@ -452,10 +444,8 @@ app.post('/api/users/:username/upload', (req, res, next) => {
 // ======== GET all projects
 app.get("/api/project/", async (req, res) => {
   try {
-    // Fetch all projects sorted by creation date (newest first)
     const projects = await queryDB("projects", "find", { sort: { createdAt: -1 } });
 
-    // Normalize data to ensure all expected fields exist
     const normalizedProjects = projects.map((p) => ({
       _id: p._id,
       name: p.name || "",
@@ -487,7 +477,6 @@ app.get("/api/project/:id", async (req, res) => {
     if (!result.length) return res.status(404).json({ error: "Project not found." });
     const p = result[0];
 
-    // Normalize single project
     const normalizedProject = {
       _id: p._id,
       name: p.name || "",
@@ -591,21 +580,19 @@ app.post("/api/project", upload.any(), async (req, res) => {
     const { name, description, owner, members, type } = req.body;
     let hashtags = [];
 
-    // Handle hashtags whether sent as JSON or plain text
-    // Handle hashtags whether sent as JSON or plain text
-if (req.body.hashtags) {
-  try {
-    hashtags = JSON.parse(req.body.hashtags);
-  } catch {
-    hashtags = req.body.hashtags
-      .split(" ")
-      .map(t => t.trim())
-      .filter(Boolean);
-  }
+    if (req.body.hashtags) {
+      try {
+        hashtags = JSON.parse(req.body.hashtags);
+      } catch {
+        hashtags = req.body.hashtags
+          .split(" ")
+          .map(t => t.trim())
+          .filter(Boolean);
+      }
 
-  // Normalize all hashtags by removing any leading #
-  hashtags = hashtags.map(t => t.replace(/^#/, "").trim());
-}
+      // Normalize all hashtags by removing any leading #
+      hashtags = hashtags.map(t => t.replace(/^#/, "").trim());
+    }
 
 
     if (!name || !owner)
@@ -721,13 +708,11 @@ app.patch("/api/project/:id/checkout", async (req, res) => {
     if (project[0].status === "checkedOut")
       return res.status(400).json({ error: "Project already checked out." });
 
-    // update status and lock to user
     await queryDB("projects", "updateOne", {
       filter: { _id: id },
       update: { $set: { status: "checkedOut", checkedOutBy: username } },
     });
 
-    // log the activity
     const activityDoc = {
       projectId: id,
       username,
@@ -791,7 +776,7 @@ app.patch("/api/project/:id", async (req, res) => {
     const id = new ObjectId(req.params.id);
     const updates = req.body;
 
-    delete updates.owner; // owner cannot change
+    delete updates.owner; 
 
     const result = await queryDB("projects", "updateOne", {
       filter: { _id: id },
@@ -813,13 +798,11 @@ app.delete("/api/project/:id", async (req, res) => {
   try {
     const id = new ObjectId(req.params.id);
 
-    // use 'delete' instead of 'deleteOne'
     const result = await queryDB("projects", "delete", { query: { _id: id } });
 
     if (result.deletedCount === 0)
       return res.status(404).json({ error: "Project not found." });
 
-    // also remove related activity
     await queryDB("activity", "delete", { query: { projectId: id } });
 
     res.json({ message: "Project deleted successfully." });
@@ -840,7 +823,6 @@ app.delete("/api/project/:id", async (req, res) => {
 
 
 // ======== SEND friend req
-// body: { requester: "username1", receiver: "username2" }
 app.post('/api/friends/request', async (req, res) => {
   try {
     const { requester, receiver } = req.body;
@@ -851,14 +833,12 @@ app.post('/api/friends/request', async (req, res) => {
     if (requester === receiver)
       return res.status(400).json({ error: 'You cannot friend yourself.' });
 
-    //check both users exist
     const users = await queryDB('users', 'find', {
       query: { username: { $in: [requester, receiver] } },
     });
     if (users.length < 2)
       return res.status(404).json({ error: 'One or both users not found.' });
 
-    //check if already friends or pending
     const existing = await queryDB('friends', 'find', {
       query: {
         $or: [
@@ -886,7 +866,6 @@ app.post('/api/friends/request', async (req, res) => {
 });
 
 // ======== ACCEPT friend req
-// body: { receiver: "username2" }
 app.patch('/api/friends/:id/accept', async (req, res) => {
   try {
     const id = req.params.id;
@@ -900,7 +879,6 @@ app.patch('/api/friends/:id/accept', async (req, res) => {
     if (result.matchedCount === 0)
       return res.status(404).json({ error: 'Friend request not found.' });
 
-    //add to both users' friend lists
     const request = await queryDB('friends', 'find', { query: { _id: new ObjectId(id)
  } });
     const { requester, receiver } = request[0];
@@ -942,7 +920,6 @@ app.patch('/api/friends/:id/decline', async (req, res) => {
 });
 
 // ======== UNFRIEND 
-// body: { username1: "A", username2: "B" }
 app.delete('/api/friends/unfriend', async (req, res) => {
   try {
     const { username1, username2 } = req.body;
@@ -950,7 +927,6 @@ app.delete('/api/friends/unfriend', async (req, res) => {
     if (!username1 || !username2)
       return res.status(400).json({ error: 'Both usernames required.' });
 
-    // Find existing friendship first
     const existing = await queryDB('friends', 'find', {
       query: {
         $or: [
@@ -964,7 +940,6 @@ app.delete('/api/friends/unfriend', async (req, res) => {
     if (existing.length === 0)
       return res.status(404).json({ error: 'No existing friendship found.' });
 
-    // Remove from friends collection
     const result = await queryDB('friends', 'deleteOne', {
       filter: {
         $or: [
@@ -974,7 +949,6 @@ app.delete('/api/friends/unfriend', async (req, res) => {
       },
     });
 
-    // Remove each from the other's friend list
     await queryDB('users', 'updateOne', {
       filter: { username: username1 },
       update: { $pull: { friends: username2 } },

@@ -22,30 +22,19 @@ const PersonalInfo = ({ user, isOwnProfile, editing, onSave, onEditToggle }) => 
     return (
       <div>
         <h2>Edit Profile</h2>
-        {/* {Object.keys(formData).map((key) => (
-          <div key={key}>
-            <label>{key}:</label>
-            <input
-              type="text"
-              name={key}
-              value={formData[key] || ""}
-              onChange={handleChange}
-            />
-          </div>
-        ))} */}
         {Object.keys(formData)
-  .filter((key) => key !== "username" && key !== "email") // 🚫 exclude these
-  .map((key) => (
-    <div key={key}>
-      <label>{key}</label>
-      <input
-        type="text"
-        name={key}
-        value={formData[key] || ""}
-        onChange={handleChange}
-      />
-    </div>
-  ))}
+          .filter((key) => key !== "username" && key !== "email") 
+          .map((key) => (
+            <div key={key}>
+              <label>{key}</label>
+              <input
+                type="text"
+                name={key}
+                value={formData[key] || ""}
+                onChange={handleChange}
+              />
+            </div>
+        ))}
 
         <button onClick={handleSubmit}>Save</button>
         <button onClick={onEditToggle}>Cancel</button>
@@ -79,21 +68,3 @@ const PersonalInfo = ({ user, isOwnProfile, editing, onSave, onEditToggle }) => 
 };
 
 export default PersonalInfo;
-
-
-// import React from "react";
-
-// const PersonalInfo = () => {
-//     return (
-//         <div>
-//             <p>Name: </p>
-//             <p>Surname: </p>
-//             <p>Username: </p>
-//             <p>Workplace: </p>
-//             <p>Email: </p>
-//             <p>Birthday: </p>
-//         </div>
-//     );
-// };
-
-// export default PersonalInfo;

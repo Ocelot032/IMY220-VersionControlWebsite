@@ -6,7 +6,9 @@ const ProfileFriendRequests = ({ username }) => {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/friends/${username}/pending`);
+      const res = await fetch(
+        `http://localhost:8080/api/friends/${username}/pending`,
+      );
       const data = await res.json();
       setRequests(data.pending || []);
     } catch (err) {

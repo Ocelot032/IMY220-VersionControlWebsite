@@ -11,14 +11,12 @@ const Header = () => {
   return (
     <header id="main-header">
       <nav id="main-navigation">
-        {/* Left: Brand */}
         <div className="nav-left">
           <Link to="/home" className="nav-brand">
             ZYNTHEX
           </Link>
         </div>
 
-        {/* Center: Create Project */}
         <div className="nav-center">
           {user && (
             <Link
@@ -31,7 +29,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* Right: Profile */}
         <div className="nav-right">
           {user && (
             <Link

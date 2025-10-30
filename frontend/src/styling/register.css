@@ -1,5 +1,3 @@
-
-/* === REGISTER PAGE (refined, centered, matches splash/login) === */
 .register-container {
   position: relative;
   height: 100vh;
@@ -7,8 +5,8 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow-y: auto; /* ✅ allows scrolling */
-  background-attachment: fixed; /* ✅ background stays still */
+  overflow-y: auto; 
+  background-attachment: fixed; 
   background: radial-gradient(
       circle at top left,
       rgba(72, 195, 248, 0.15),
@@ -21,7 +19,7 @@
     ),
     linear-gradient(145deg, #0b111f 0%, #0f172a 80%);
   color: var(--color-text);
-  padding: 4rem 0; /* ✅ some space so scroll feels natural */
+  padding: 4rem 0;
 }
 
 .register-card {
@@ -102,7 +100,6 @@
   margin-top: 0.5rem;
 }
 
-/* --- Button (same as splash/login) --- */
 .register-btn {
   background: linear-gradient(145deg, #2b3a4f, #1e293b);
   color: #e2e8f0;
@@ -125,7 +122,6 @@
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
 }
 
-/* --- Footer alignment --- */
 footer {
   margin-top: 3rem;
   text-align: center;

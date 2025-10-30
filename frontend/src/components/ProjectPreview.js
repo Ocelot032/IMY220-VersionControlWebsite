@@ -63,64 +63,63 @@ const ProjectPreview = ({ project }) => {
 
   return (
     <div
-  id={`project-${project._id}`}
-  className="project-card profile-project-card"
-  onClick={handleClick}
->
-  <div className="project-info">
-    <div className="project-header">
-      <h3 className="project-title">
-        {project.name}
-        {savedProjects.includes(project._id) && (
-          <span className="saved-star" title="You saved this project">★</span>
-        )}
-      </h3>
-    </div>
-
-    <button
-      type="button"
-      className={`save-btn ${savedProjects.includes(project._id) ? "saved" : ""}`}
-      onClick={(e) => handleSave(project._id, e)}
+      id={`project-${project._id}`}
+      className="project-card profile-project-card"
+      onClick={handleClick}
     >
-      {savedProjects.includes(project._id) ? "Unsave" : "Save"}
-    </button>
+      <div className="project-info">
+        <div className="project-header">
+          <h3 className="project-title">
+            {project.name}
+            {savedProjects.includes(project._id) && (
+              <span className="saved-star" title="You saved this project">★</span>
+            )}
+          </h3>
+        </div>
 
-    <p className="project-description">{project.description || "No description provided."}</p>
-
-    <p className="project-meta">
-      By{" "}
-      <span
-        className="project-owner"
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate(`/profile/${project.owner}`);
-        }}
-      >
-        @{project.owner}
-      </span>{" "}
-      | Type: <span className="project-type">{project.type || "unspecified"}</span> |{" "}
-      <span className="project-date">{formattedDate}</span>
-    </p>
-
-    <p className="project-stats">
-      {memberCount} member{memberCount !== 1 ? "s" : ""} · {checkinCount} check-in
-      {checkinCount !== 1 ? "s" : ""}
-    </p>
-
-    <div className="project-tags">
-      {project.hashtags?.map((tag, i) => (
-        <span
-          key={i}
-          className="hashtag"
-          onClick={(e) => handleHashtagClick(tag, e)}
+        <button
+          type="button"
+          className={`save-btn ${savedProjects.includes(project._id) ? "saved" : ""}`}
+          onClick={(e) => handleSave(project._id, e)}
         >
-          #{tag}
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+          {savedProjects.includes(project._id) ? "Unsave" : "Save"}
+        </button>
 
+        <p className="project-description">{project.description || "No description provided."}</p>
+
+        <p className="project-meta">
+          By{" "}
+          <span
+            className="project-owner"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/profile/${project.owner}`);
+            }}
+          >
+            @{project.owner}
+          </span>{" "}
+          | Type: <span className="project-type">{project.type || "unspecified"}</span> |{" "}
+          <span className="project-date">{formattedDate}</span>
+        </p>
+
+        <p className="project-stats">
+          {memberCount} member{memberCount !== 1 ? "s" : ""} · {checkinCount} check-in
+          {checkinCount !== 1 ? "s" : ""}
+        </p>
+
+        <div className="project-tags">
+          {project.hashtags?.map((tag, i) => (
+            <span
+              key={i}
+              className="hashtag"
+              onClick={(e) => handleHashtagClick(tag, e)}
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

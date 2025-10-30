@@ -22,7 +22,6 @@ const Profile = () => {
   const [createdProjects, setCreatedProjects] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
 
-  // --- fetch profile info ---
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -42,7 +41,6 @@ const Profile = () => {
     fetchProfile();
   }, [username]);
 
-  // --- fetch projects ---
   useEffect(() => {
     if (!user?.username) return;
 

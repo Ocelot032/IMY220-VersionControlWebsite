@@ -58,7 +58,6 @@ const Home = () => {
           <Header />
 
           <main id="home-main" className="home-content">
-            {/* --- Search Bar --- */}
             <section id="search-section" className="search-section">
               <input
                 id="search-bar"
@@ -70,7 +69,6 @@ const Home = () => {
               />
             </section>
 
-            {/* --- Feed toggle --- */}
             <section id="feed-toggle" className="feed-toggle">
               <button
                 id="global-feed-btn"
@@ -88,7 +86,6 @@ const Home = () => {
               </button>
             </section>
 
-            {/* --- Project Feed --- */}
             <section id="project-feed" className="project-feed">
               {loading ? (
                 <p className="feed-message">Loading projects...</p>

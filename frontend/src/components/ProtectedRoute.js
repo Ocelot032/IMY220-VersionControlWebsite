@@ -5,7 +5,6 @@ import { AuthContext } from "../context/AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
 
-  // If not logged in, send to login page
   if (!user) {
     return <Navigate to="/login" replace />;
   }

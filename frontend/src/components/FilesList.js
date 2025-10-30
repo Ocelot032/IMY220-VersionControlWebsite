@@ -20,29 +20,3 @@ const FilesList = ({ files }) => (
 );
 
 export default FilesList;
-
-
-
-// import React from "react";
-// import { Link } from "react-router-dom";
-
-// const FilesList = ({ files }) => (
-//   <section>
-//     <h2>Files</h2>
-//     {files.length === 0 ? (
-//       <p>No files yet.</p>
-//     ) : (
-//       <ul>
-//         {files.map((file) => (
-//           <li key={file.fileUrl}>
-//             <a href={`/uploads/projects/${file.fileUrl}`} download>
-//               {file.filename}
-//             </a>
-//           </li>
-//         ))}
-//       </ul>
-//     )}
-//   </section>
-// );
-
-// export default FilesList;

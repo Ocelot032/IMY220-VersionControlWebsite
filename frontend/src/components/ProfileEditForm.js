@@ -24,7 +24,7 @@ const ProfileEditForm = ({ user }) => {
 
       if (res.ok) {
         alert("Profile updated successfully!");
-        window.location.reload(); // refresh page to show new info
+        window.location.reload();
       } else {
         alert(data.error || "Failed to update profile.");
       }

@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import ProjectInfo from "../components/ProjectInfo";
+import ProjectImage from "../components/ProjectImage";
+import ProjectActions from "../components/ProjectActions";
 import FilesList from "../components/FilesList";
 import Messages from "../components/Messages";
 import { AuthContext } from "../context/AuthContext";
@@ -10,27 +13,31 @@ import "../styling/project.css";
 const Project = () => {
   const { projectId } = useParams();
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [project, setProject] = useState(null);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const projRes = await fetch(`/api/project/${projectId}`);
-        const projData = await projRes.json();
-        setProject(projData);
+  const fetchProjectData = async () => {
+    try {
+      const [projRes, actRes] = await Promise.all([
+        fetch(`/api/project/${projectId}`),
+        fetch(`/api/activity/project/${projectId}`),
+      ]);
+      const projData = await projRes.json();
+      const actData = await actRes.json();
+      setProject(projData);
+      setActivity(actData);
+    } catch (err) {
+      console.error("Error loading project:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const actRes = await fetch(`/api/activity/project/${projectId}`);
-        const actData = await actRes.json();
-        setActivity(actData);
-      } catch (err) {
-        console.error("Error fetching project page data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+  useEffect(() => {
+    fetchProjectData();
   }, [projectId]);
 
   if (loading) return <p>Loading project...</p>;
@@ -39,46 +46,28 @@ const Project = () => {
   const isOwner = user?.username === project.owner;
   const isMember = project.members?.includes(user?.username);
 
+  const handleProjectUpdate = async () => {
+    await fetchProjectData();
+  };
+
   return (
     <div>
       <Header />
-
       <main className="project-page">
-  <div className="project-container">
-    <h1>{project.name}</h1>
-    <p className="project-description">{project.description}</p>
-    <img src={`/uploads/projects/${project.imageUrl}`} alt={project.name} />
-
-    <p className="project-meta">
-      Status: {project.status} | Version: {project.version}
-    </p>
-
-    <div className="project-tags">
-      {project.hashtags?.length > 0
-        ? project.hashtags.map((tag) => <span key={tag}>#{tag}</span>)
-        : <p>No hashtags</p>}
-    </div>
-
-    {(isOwner || isMember) && (
-      <section className="actions">
-        {project.status === "checkedIn" ? (
-          <button>Check Out</button>
-        ) : project.checkedOutBy === user.username ? (
-          <button>Check In</button>
-        ) : (
-          <p>Checked out by {project.checkedOutBy}</p>
-        )}
-        {isOwner && <button>Edit Project</button>}
-        {isOwner && <button>Delete Project</button>}
-      </section>
-    )}
-
-    <FilesList files={project.files || []} />
-    <Messages messages={activity} />
-  </div>
-</main>
-
-
+        <div className="project-container">
+          <ProjectInfo project={project} />
+          <ProjectImage imageUrl={project.imageUrl} name={project.name} />
+          <ProjectActions
+            project={project}
+            user={user}
+            isOwner={isOwner}
+            isMember={isMember}
+            onUpdate={handleProjectUpdate}
+          />
+          <FilesList files={project.files || []} />
+          <Messages messages={activity} />
+        </div>
+      </main>
       <Footer />
     </div>
   );
